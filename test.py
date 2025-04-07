@@ -4,7 +4,7 @@ import requests
 import time
 import pandas as pd
 load_dotenv()
-from DB import df_save
+from DataBase.DB import df_save
 
 gangseo = os.environ.get('GANGSEO_KEY')
 gangdong = os.environ.get('GANGDONG_KEY')

@@ -195,5 +195,7 @@ def total_model_restaurant_data_save():
 
 
 if __name__ == "__main__":
-
+    total_administrative_action_data_save()
+    total_model_restaurant_data_save()
+    total_map_data_save()
     pass
