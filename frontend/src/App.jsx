@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function App() {
-  const setMsg = async () => {
-    axios.get("http://localhost:8000/api/ping")
-    .then(res => {
-      console.log(res.data)
-    }).catch(err => {
-      console.log(err);
-    })
-  }
+  const [msg, setMsg] = useState("Loading...");
 
-  return <h1>Hello, FastAPI says: {setMsg}</h1>;
+  useEffect(() => {
+    axios.get("http://localhost:8000/api/ping")
+      .then(res => {
+        setMsg(res.data);
+      })
+      .catch(err => {
+        console.error(err);
+        setMsg("error"); 
+      });
+  }, []); 
+
+  return <h1>Hello, FastAPI says: {msg}</h1>;
 }
 
 export default App;

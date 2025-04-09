@@ -15,3 +15,8 @@ app.add_middleware(
 @app.get("/api/ping")
 async def ping():
     return {"message": "pong"}
+
+
+@app.get("/api/model_restaurant")
+async def model_restaurant():
+    return 
