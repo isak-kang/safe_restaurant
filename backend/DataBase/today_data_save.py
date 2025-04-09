@@ -12,7 +12,11 @@ import logging
 from dotenv import load_dotenv
 load_dotenv()
 
-from DataBase.DB import df_load,df_save
+from DB import df_load,df_save,delete_data
+from map_data_create import total_map_data_save
+
+from datetime import datetime
+
 
 	
 # DB
@@ -24,94 +28,52 @@ engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}/{db}")
 
 # 행정처분 가게 api key 
 apikey = os.environ.get('API_KEY')
-
 # 로깅
 logging.basicConfig(filename="coord_errors.log", level=logging.WARNING)
 
 # 전체 데이터 저장 API -> totaldata
-def total_administrative_action_data_save():
-    start = 1
-    end = 1000
-    while 1 :
+def today_administrative_action_data_save():
 
-        url = f'http://openapi.seoul.go.kr:8088/{apikey}/json/SeoulAdminMesure/{start}/{end}'
-
-        response = requests.get(url)
-        contents = response.text
-        json_ob = json.loads(contents)
-
-        body = json_ob['SeoulAdminMesure']['row']
-        dataframe = pd.DataFrame(body)
-        
-        try:
-            dataframe.to_sql(name='tb_restaurant_hygiene', con=engine, if_exists='append', index=False)
-            print(f"tb_restaurant_hygiene: 데이터 삽입 성공!{start}~{end}")
-            start += 1000
-            end += 1000
-        except Exception as e:
-            print(f"tb_restaurant_hygiene: 데이터 삽입 실패 - {e}")
-            break
-
-
-
-# 주소 -> 좌표 
-def get_coords(address):
-    apiurl = "https://api.vworld.kr/req/address?"
-    params = {
-        "service": "address",
-        "request": "getcoord",
-        "crs": "epsg:4326",
-        "address": address,
-        "format": "json",
-        "type": "road",
-        "key": "95BE0F15-DF34-3802-9CA6-E16BA4F74E79"
-    }
-
-    try:
-        response = requests.get(apiurl, params=params, timeout=3)
-        if response.status_code == 200:
-            result = response.json().get("response", {}).get("result")
-            if result and "point" in result:
-                point = result["point"]
-                return float(point["x"]), float(point["y"])
-            else:
-                logging.warning(f"[결과 없음] 주소: {address}")
-        else:
-            logging.warning(f"[응답 오류] 주소: {address}, Status Code: {response.status_code}")
-    except Exception as e:
-        logging.warning(f"[예외 발생] 주소: {address}, 예외: {str(e)}")
-
-    return None, None
-
-# 좌표 데이터 저장
-def total_map_data_save():
-    query = "SELECT DISTINCT(SITE_ADDR_RD) FROM restaurant_hygiene.tb_restaurant_hygiene;"
-    df = df_load(query)
-    df['SITE_ADDR_RD'] = df['SITE_ADDR_RD'].str.split(',').str[0]
-    df = df.drop_duplicates(subset=["SITE_ADDR_RD"]).reset_index(drop=True)
+    now = datetime.today().strftime("%Y%m%d")
+    print(datetime.today().strftime("%Y%m%d"))
+    url = f'http://openapi.seoul.go.kr:8088/{apikey}/json/SeoulAdminMesure/1/1000/{now}'
+    print(url)
+    response = requests.get(url)
+    contents = response.text
+    json_ob = json.loads(contents)
     
+    if json_ob['RESULT']['MESSAGE']  == "해당하는 데이터가 없습니다.":
+        return print("없음")
 
-    # 좌표 컬럼 추가
-    df["longitude"] = None #경도
-    df["latitude"] = None #위도
-
-    # 주소 → 좌표 변환
-    for idx, row in tqdm(df.iterrows(), total=len(df)):
-        addr = row["SITE_ADDR_RD"]
-
-        x, y = get_coords(addr) 
+    body = json_ob['SeoulAdminMesure']['row']
+    dataframe = pd.DataFrame(body)
+    
+    try:
+        dataframe.to_sql(name='tb_restaurant_hygiene', con=engine, if_exists='append', index=False)
+        print(f"tb_restaurant_hygiene: 데이터 삽입 성공!")
         
-        df.at[idx, "longitude"] = x # 경도 x
-        df.at[idx, "latitude"] = y # 위도 y 왜이리 헷갈리냐.... 위도경도;;;
-        time.sleep(0.2)
-        print(addr,x,y)
+        time.sleep(10)
 
-    df_save(df,"tb_map")
+        print("tb_restaurant_hygiene 좌표 데이터 저장 시도")
+        query = "SELECT DISTINCT(SITE_ADDR_RD) FROM restaurant_hygiene.tb_restaurant_hygiene;"
+        total_map_data_save(query)
+
+    except Exception as e:
+        print(f"tb_restaurant_hygiene: 데이터 삽입 실패 - {e}")
+        
 
 
 
-# 모범식당 신청 데이터 저장
-def total_model_restaurant_data_save():
+
+
+# 모범식당 신청 데이터 저장 # 마포랑 용산이 없음.
+def today_model_restaurant_data_save():
+
+    table = 'model_restaurant_apply'
+    delete_data(table)
+
+    time.sleep(2)
+
     gangseo = os.environ.get('GANGSEO_KEY')
     gangdong = os.environ.get('GANGDONG_KEY')
     gangbuk = os.environ.get('GANGBUK_KEY')
@@ -172,12 +134,12 @@ def total_model_restaurant_data_save():
 
         else:
             url = f'http://openAPI.{key}.go.kr:8088/{value}/json/{key.capitalize()}ModelRestaurantApply/1/1000/'
-        
-        url_parts = url.split('/')  
-        url_tmp = str(url_parts[5])  
 
+        url_parts = url.split('/')  
+        url_tmp = str(url_parts[5])
         res = requests.get(url)
         data=res.json()
+
         rows =  data[url_tmp]["row"]
         print(rows)
         
@@ -192,10 +154,18 @@ def total_model_restaurant_data_save():
     print(df)
     table = 'model_restaurant_apply'
     df_save(df,table)
+    print("모범식당 저장완료")
+
+    time.sleep(10)
+
+    print("모범식당 map데이터 저장시작")
+    query = "SELECT DISTINCT(SITE_ADDR_RD) FROM restaurant_hygiene.model_restaurant_apply;"
+    total_map_data_save(query)
 
 
 if __name__ == "__main__":
-    total_administrative_action_data_save()
-    total_model_restaurant_data_save()
-    total_map_data_save()
+    today_administrative_action_data_save()
+    time.sleep(2)
+    today_model_restaurant_data_save()
+
     pass
