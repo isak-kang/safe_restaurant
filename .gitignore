@@ -2,3 +2,4 @@ hygiene
 .env
 seoul_map.html
 __pycache__
+safe

@@ -51,5 +51,7 @@ def delete_data(table):
             print(f"삭제 중 오류 발생: {str(e)}")
 
 if __name__ == "__main__":
-    table = "model_restaurant_apply"
-    delete_data(table)
+    # table = "model_restaurant_apply"
+    # delete_data(table)
+    print(
+    )
