@@ -44,5 +44,5 @@ def query_data_load():
 
 if __name__ =="__main__":
     # print(model_restaurnt_load())
-    print(query_data_load())
-
+    # print(query_data_load())
+    pass

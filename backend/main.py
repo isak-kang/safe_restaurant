@@ -1,6 +1,7 @@
 from fastapi import FastAPI,Query
 from fastapi.middleware.cors import CORSMiddleware
 from DataBase.DB import df_load
+from fastapi.responses import JSONResponse
 
 
 app = FastAPI()
@@ -14,14 +15,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/api/ping")
-async def ping():
-    print("완")
-    return {"message": "pong"}
+# @app.get("/api/model_restaurant")
+# async def model_restaurant():
+    
+#     query = """
+#         SELECT 
+#             CGG_CODE,
+#             ASGN_YMD,
+#             ASGN_YY,
+#             UPSO_NM,
+#             SITE_ADDR_RD,
+#             SNT_UPTAE_NM,
+#             TRDP_AREA,
+#             ADMDNG_NM
+#         FROM model_restaurant_apply
+#         WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
+#         order by ASGN_YMD desc;
+#     """
+
+
+#     df = df_load(query)
+#     df["addr"] = df["SITE_ADDR_RD"].apply(lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else "")
+    
+#     return df.to_dict(orient="records")
+
+
+
 
 @app.get("/api/model_restaurant")
-async def model_restaurant():
-    
+async def model_restaurant(gu: str = "", uptae: str = "", name: str = ""):
     query = """
         SELECT 
             CGG_CODE,
@@ -34,14 +56,52 @@ async def model_restaurant():
             ADMDNG_NM
         FROM model_restaurant_apply
         WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
-        order by ASGN_YMD desc;
+        ORDER BY ASGN_YMD DESC;
     """
-
-
     df = df_load(query)
     df["addr"] = df["SITE_ADDR_RD"].apply(lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else "")
-    
-    return df.to_dict(orient="records")
+
+    if gu:
+        df = df[df["addr"] == gu]
+    if uptae:
+        df = df[df["SNT_UPTAE_NM"] == uptae]
+    if name:
+        df = df[df["UPSO_NM"].str.contains(name, case=False, na=False)]
+
+    return JSONResponse(content=df.to_dict(orient="records"))
+
+
+@app.get("/api/filter_options")
+async def filter_options():
+    query = """
+        SELECT 
+            SITE_ADDR_RD,
+            SNT_UPTAE_NM
+        FROM model_restaurant_apply
+        WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = '';
+    """
+    df = df_load(query)
+    df["addr"] = df["SITE_ADDR_RD"].apply(lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else "")
+    gu_options = sorted(df["addr"].dropna().unique())
+    uptae_options = sorted(df["SNT_UPTAE_NM"].dropna().unique())
+    return {"guOptions": gu_options, "uptaeOptions": uptae_options}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @app.get("/api/tb_restaurant_hygiene")
 async def model_restaurant():
