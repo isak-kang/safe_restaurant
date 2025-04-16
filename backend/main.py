@@ -1,4 +1,6 @@
-from fastapi import FastAPI,Query
+from fastapi import FastAPI,Query,HTTPException, Path
+from typing import List
+
 from fastapi.middleware.cors import CORSMiddleware
 from DataBase.DB import df_load
 from fastapi.responses import JSONResponse
@@ -87,7 +89,27 @@ async def filter_options():
     return {"guOptions": gu_options, "uptaeOptions": uptae_options}
 
 
-
+@app.get("/api/model_restaurant/{upso_nm}")
+async def get_restaurant_by_name(upso_nm: str = Path(..., title="업소명")):
+    query = f"""
+        SELECT 
+            CGG_CODE,
+            ASGN_YMD,
+            ASGN_YY,
+            UPSO_NM,
+            SITE_ADDR_RD,
+            SNT_UPTAE_NM,
+            TRDP_AREA,
+            ADMDNG_NM
+        FROM model_restaurant_apply
+        WHERE UPSO_NM = '{upso_nm}'
+        AND ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
+        LIMIT 1;
+    """
+    df = df_load(query)
+    if df.empty:
+        raise HTTPException(status_code=404, detail="Restaurant not found")
+    return df.iloc[0].to_dict()
 
 
 

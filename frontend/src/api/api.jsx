@@ -16,3 +16,8 @@ export const fetchFilterOptions = async () => {
   const response = await axios.get(`${API_BASE}/filter_options`);
   return response.data;
 };
+
+export const fetchRestaurantByName = async (upso_nm) => {
+  const response = await axios.get(`${API_BASE}/model_restaurant/${encodeURIComponent(upso_nm)}`);
+  return response.data;
+};

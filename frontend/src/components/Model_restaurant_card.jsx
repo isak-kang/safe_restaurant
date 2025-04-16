@@ -1,23 +1,20 @@
 import React from "react";
-import { Card } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
-const ModelRestaurantCard = ({ row }) => {
+function ModelRestaurantCard({ row }) {
   return (
-    <Card className="mb-3 shadow-sm">
-      <Card.Body>
-        <Card.Title>{row.UPSO_NM}</Card.Title>
-        <Card.Text>
-          <strong>주소:</strong> {row.SITE_ADDR_RD}<br />
-          <strong>구:</strong> {row.addr}<br />
-          <strong>행정동 코드:</strong> {row.CGG_CODE}<br />
-          <strong>지정일:</strong> {row.ASGN_YMD} ({row.ASGN_YY})<br />
-          <strong>업종:</strong> {row.SNT_UPTAE_NM}<br />
-          <strong>가계 넓이:</strong> {row.TRDP_AREA}<br />
-          <strong>행정동:</strong> {row.ADMDNG_NM}
-        </Card.Text>
-      </Card.Body>
-    </Card>
+    <Link to={`/restaurant/${encodeURIComponent(row.UPSO_NM)}`} style={{ textDecoration: "none", color: "inherit" }}>
+      <div className="card mb-3 card-hover" style={{ cursor: "pointer" }}>
+        <div className="card-body">
+          <h5 className="card-title">{row.UPSO_NM}</h5>
+          <p className="card-text">{row.SITE_ADDR_RD}</p>
+          <p className="card-text">
+            <small className="text-muted">{row.SNT_UPTAE_NM}</small>
+          </p>
+        </div>
+      </div>
+    </Link>
   );
-};
+}
 
 export default ModelRestaurantCard;

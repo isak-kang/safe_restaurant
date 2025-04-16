@@ -1,3 +1,11 @@
+input,
+select,
+button {
+  font-size: 16px !important;
+}
+
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -39,4 +47,74 @@
 
 .read-the-docs {
   color: #888;
+}
+
+
+/* 필터 패널 */
+
+
+
+/* 필터 패널 기본 스타일 */
+.filter-panel {
+  position: fixed;
+  top: 0;
+  right: -350px; /* 필터 패널이 화면 밖에 위치하도록 */
+  width: 350px;
+  height: 100%;
+  background-color: white;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: right 0.3s ease; /* 슬라이드 애니메이션 */
+  z-index: 1000;
+
+  /* ✅ 내부만 스크롤 가능하게 추가 */
+  overflow-y: auto;
+}
+
+/* 필터 패널이 열렸을 때 */
+.filter-panel.open {
+  right: 0; /* 오른쪽으로 슬라이드해서 보이게 함 */
+}
+
+.filter-img {
+  width: 24px; /* 이미지 크기 조정 */
+  height: 24px; /* 이미지 크기 조정 */
+  object-fit: contain; /* 이미지 비율 유지 */
+}
+
+
+/* 제목 영역 */
+.filter-header {
+  position: relative;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* 왼쪽 상단에 위치한 닫기 버튼 */
+.close-btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #888;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+/* App.css 또는 filter 관련 CSS */
+.btn-group .btn.active {
+  background-color: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+
+/* App.css에 추가 */
+.body-no-scroll {
+  overflow: hidden;
 }
