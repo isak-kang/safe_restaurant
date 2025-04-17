@@ -26,3 +26,11 @@ export const fetchMapData = async (address) => {
   const response = await axios.get(`${API_BASE}/get_gocode`,{ params: { address: address } });
   return response.data;
 };
+
+export const fetchMainMap = async (gu = "") => {
+  const params = {};
+  if (gu) params.gu = gu;
+
+  const response = await axios.get(`${API_BASE}/main_map`, { params });
+  return response.data;
+};

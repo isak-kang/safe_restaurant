@@ -1,18 +1,24 @@
 import React from 'react';
+import { Link } from "react-router-dom";
 
 function Header() {
   return (
     <header style={styles.header}>
       <div style={styles.title}>안전한식당</div>
-
+      <Link to={"/"}><div> <img src="/img/home_img.png" alt="옵션" className='filter-img'/></div></Link>
+      <Link to={"/main_map"}><div> <img src="/img/map_img.png" alt="옵션" className='filter-img'/></div></Link>
+      <Link to={"/main_map"}><div> <img src="/img/option_img.png" alt="옵션" className='filter-img'/></div></Link>
+      
+      
+      
     </header>
   );
 }
 
 const styles = {
   header: {
-    width: '100%',
-    height: '60px',
+    width: '100vh',
+    height: '10vh',
     backgroundColor: '#ffffff',
     display: 'flex',
     alignItems: 'center',

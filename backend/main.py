@@ -102,6 +102,38 @@ async def get_gocode(address: str):
     }
 
 
+@app.get("/api/main_map")
+async def model_restaurant(gu: str = ""):
+    query1 = f"SELECT * FROM tb_map"
+    query2 = f"SELECT SITE_ADDR_RD FROM restaurant_hygiene.model_restaurant_apply;"
+    map_df = df_load(query1)
+    model_addr_df = df_load(query2)
+
+    model_addr_df["addr"] = model_addr_df["SITE_ADDR_RD"].apply(lambda x: x.split(",")[0])
+
+    # model_addr_df에서 'addr' 값에 해당하는 주소만 필터링한 후 복사본으로 만듭니다.
+    filtered_df = map_df[map_df['SITE_ADDR_RD'].isin(model_addr_df['addr'])].copy()
+
+    # 필터링된 주소에서 '구' 정보를 추출하여 addr_gu 컬럼으로 추가합니다.
+    filtered_df["addr_gu"] = filtered_df["SITE_ADDR_RD"].apply(
+        lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else ""
+    )
+  
+
+    if gu:
+        filtered_df = filtered_df[filtered_df["addr_gu"] == gu]
+        print(filtered_df)
+    return JSONResponse(content=filtered_df.to_dict(orient="records"))
+
+
+
+
+
+
+
+
+
+
 
 
 
