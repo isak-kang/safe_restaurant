@@ -28,6 +28,13 @@ def df_save(df,table):
     except Exception as e:
         print(f"{table}: 데이터 삽입 실패 - {e}")
 
+def csv_save(csv_file,table_name):
+
+    df = pd.read_csv(csv_file)
+
+    df.to_sql(name=table_name, con=engine, if_exists='append', index=False)
+
+
 # def delete_data(table):
 #     with engine.connect() as conn:
 #         try:
@@ -53,5 +60,5 @@ def delete_data(table):
 if __name__ == "__main__":
     # table = "model_restaurant_apply"
     # delete_data(table)
-    print(
-    )
+    print()
+    csv_save("C:/Users/ISAK/Desktop/python/safe_restaurant/crawled_kakao_img_urls.csv","restaurant_images")
