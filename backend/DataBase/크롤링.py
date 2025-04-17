@@ -123,7 +123,7 @@ def crawling_img_url():
 
 
 
-
+ 
 
 def crawling_img_url_save():
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
