@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchRestaurants, fetchFilterOptions } from "../api/api";
 import Pagination from "../components/Pagination";
@@ -9,7 +9,6 @@ import '../App.css';
 function Main() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // 쿼리에서 초기값 읽기
   const [selectedGu, setSelectedGu] = useState(searchParams.get("gu") || "");
   const [selectedUptae, setSelectedUptae] = useState(searchParams.get("uptae") || "");
   const [searchTerm, setSearchTerm] = useState(searchParams.get("name") || "");
@@ -19,6 +18,8 @@ function Main() {
   const [guOptions, setGuOptions] = useState([]);
   const [uptaeOptions, setUptaeOptions] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
+
+  const filterRef = useRef(null);  // 👉 필터 패널 참조
 
   const itemsPerPage = 5;
 
@@ -32,7 +33,7 @@ function Main() {
     setSearchParams(newParams);
   };
 
-  // 🔎 디바운싱된 필터 변경 → URL 갱신
+  // 🔎 필터 변경 시 URL 갱신
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
       updateURLParams(selectedGu, selectedUptae, searchTerm, 1);
@@ -40,7 +41,7 @@ function Main() {
     return () => clearTimeout(debounceTimer);
   }, [selectedGu, selectedUptae, searchTerm]);
 
-  // 📦 초기 필터 옵션 로딩
+  // 📦 필터 옵션 로딩
   useEffect(() => {
     const loadOptions = async () => {
       const options = await fetchFilterOptions();
@@ -50,7 +51,7 @@ function Main() {
     loadOptions();
   }, []);
 
-  // 📡 쿼리 파라미터 변화 시 → 데이터 로딩
+  // 📡 쿼리 변화 시 데이터 로딩
   useEffect(() => {
     const gu = searchParams.get("gu") || "";
     const uptae = searchParams.get("uptae") || "";
@@ -69,13 +70,13 @@ function Main() {
     loadData();
   }, [searchParams]);
 
-  // 페이지네이션 핸들러
+  // 📃 페이지네이션
   const handlePageChange = (page) => {
     setCurrentPage(page);
     updateURLParams(selectedGu, selectedUptae, searchTerm, page);
   };
 
-  // 🔒 필터 열림 시 스크롤 제한
+  // 🔒 필터 열릴 때 스크롤 제한
   useEffect(() => {
     if (filterOpen) {
       document.body.classList.add('body-no-scroll');
@@ -84,7 +85,21 @@ function Main() {
     }
   }, [filterOpen]);
 
-  // ✂️ 현재 페이지 데이터 잘라내기
+  // 👆 외부 클릭 시 필터 닫기
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setFilterOpen(false);
+      }
+    };
+  
+    document.addEventListener("click", handleClickOutside, true);
+  
+    return () => {
+      document.removeEventListener("click", handleClickOutside, true);
+    };
+  }, [filterOpen]);
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const currentItems = data.slice(indexOfLastItem - itemsPerPage, indexOfLastItem);
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -96,7 +111,7 @@ function Main() {
         className="form-control"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="예: 김밥천국"
+        placeholder="예: 한우"
       />
 
       <h2 className="mb-4 d-flex justify-content-between align-items-center">
@@ -107,13 +122,15 @@ function Main() {
       </h2>
 
       {/* 필터 패널 */}
-      <div className={`filter-panel ${filterOpen ? "open" : ""}`}>
+      <div
+        className={`filter-panel ${filterOpen ? "open" : ""}`}
+        ref={filterRef}
+      >
         <div className="filter-header position-relative mb-3">
           <button className="close-btn" onClick={() => setFilterOpen(false)}>&times;</button>
           <h4 className="text-center m-0">필터</h4>
         </div>
         <div className="p-3">
-          {/* 구 필터 */}
           <div className="filter-section mb-3">
             <label className="fw-bold mb-2">구 선택</label>
             <div className="btn-group flex-wrap" role="group">
@@ -137,7 +154,6 @@ function Main() {
             </div>
           </div>
 
-          {/* 업태 필터 */}
           <div className="filter-section mb-3">
             <label className="fw-bold mb-2">업태 선택</label>
             <div className="btn-group flex-wrap" role="group">

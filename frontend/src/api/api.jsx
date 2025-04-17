@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE = "http://localhost:7777/api";
+const API_BASE = import.meta.env.VITE_BACKEND_ADDR;
 
 export const fetchRestaurants = async (gu = "", uptae = "", name = "") => {
   const params = {};
@@ -19,5 +19,10 @@ export const fetchFilterOptions = async () => {
 
 export const fetchRestaurantByName = async (upso_nm) => {
   const response = await axios.get(`${API_BASE}/model_restaurant/${encodeURIComponent(upso_nm)}`);
+  return response.data;
+};
+
+export const fetchMapData = async (address) => {
+  const response = await axios.get(`${API_BASE}/get_gocode`,{ params: { address: address } });
   return response.data;
 };

@@ -17,33 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# @app.get("/api/model_restaurant")
-# async def model_restaurant():
-    
-#     query = """
-#         SELECT 
-#             CGG_CODE,
-#             ASGN_YMD,
-#             ASGN_YY,
-#             UPSO_NM,
-#             SITE_ADDR_RD,
-#             SNT_UPTAE_NM,
-#             TRDP_AREA,
-#             ADMDNG_NM
-#         FROM model_restaurant_apply
-#         WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
-#         order by ASGN_YMD desc;
-#     """
-
-
-#     df = df_load(query)
-#     df["addr"] = df["SITE_ADDR_RD"].apply(lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else "")
-    
-#     return df.to_dict(orient="records")
-
-
-
-
 @app.get("/api/model_restaurant")
 async def model_restaurant(gu: str = "", uptae: str = "", name: str = ""):
     query = """
@@ -112,6 +85,21 @@ async def get_restaurant_by_name(upso_nm: str = Path(..., title="업소명")):
     return df.iloc[0].to_dict()
 
 
+@app.get("/api/get_gocode")
+async def get_gocode(address: str):
+    SITE_ADDR_RD = address.split(",")[0].strip()
+    print(SITE_ADDR_RD)
+    query = f"SELECT * FROM tb_map WHERE SITE_ADDR_RD = '{SITE_ADDR_RD}'"
+    df = df_load(query)
+    if df.empty:
+        raise HTTPException(status_code=404, detail="해당 주소에 대한 좌표 정보가 없습니다.")
+
+    result = df.iloc[0].to_dict()
+    print(result)
+    return {
+        "LAT": result.get("latitude"),
+        "LNG": result.get("longitude")
+    }
 
 
 
