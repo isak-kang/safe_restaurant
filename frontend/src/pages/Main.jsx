@@ -19,7 +19,7 @@ function Main() {
   const [uptaeOptions, setUptaeOptions] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
 
-  const filterRef = useRef(null);  // 👉 필터 패널 참조
+  const filterRef = useRef(null);
 
   const itemsPerPage = 5;
 
@@ -33,11 +33,23 @@ function Main() {
     setSearchParams(newParams);
   };
 
-  // 🔎 필터 변경 시 URL 갱신
+  // 🔎 필터 변경 시 URL 갱신 (페이지는 1로 초기화)
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      updateURLParams(selectedGu, selectedUptae, searchTerm, 1);
+      const currentGu = searchParams.get("gu") || "";
+      const currentUptae = searchParams.get("uptae") || "";
+      const currentName = searchParams.get("name") || "";
+  
+      // 필터 변경 시에만 page를 1로 초기화
+      const isGuChanged = selectedGu !== currentGu;
+      const isUptaeChanged = selectedUptae !== currentUptae;
+      const isNameChanged = searchTerm !== currentName;
+  
+      const newPage = (isGuChanged || isUptaeChanged || isNameChanged) ? 1 : currentPage;
+  
+      updateURLParams(selectedGu, selectedUptae, searchTerm, newPage);
     }, 300);
+  
     return () => clearTimeout(debounceTimer);
   }, [selectedGu, selectedUptae, searchTerm]);
 
@@ -51,7 +63,7 @@ function Main() {
     loadOptions();
   }, []);
 
-  // 📡 쿼리 변화 시 데이터 로딩
+  // 📡 쿼리 변화 시 데이터 로딩 및 상태 동기화
   useEffect(() => {
     const gu = searchParams.get("gu") || "";
     const uptae = searchParams.get("uptae") || "";
@@ -92,9 +104,8 @@ function Main() {
         setFilterOpen(false);
       }
     };
-  
+
     document.addEventListener("click", handleClickOutside, true);
-  
     return () => {
       document.removeEventListener("click", handleClickOutside, true);
     };
