@@ -12,7 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 import sys
 import os
-from DB import df_load
+from DataBase.DB import df_load
 from tqdm import tqdm
 
 # Selenium 설정
@@ -219,7 +219,28 @@ def crawling_img_url_save():
 # 실행
 
 if __name__ == "__main__":
+    upso = "재희네식당"
+    query = "SELECT * FROM restaurant_hygiene.restaurant_images;"
+    df = df_load(query)
 
-    # crawling_img_url()
-    crawling_img_url_save()
+    # 업소명 추출
+    df["upso_name"] = df["img_search_addr"].apply(lambda x: x.split(",")[1].strip())
+    print(df)
+    # 요청받은 업소명과 일치하는 행 필터링
+    matched_df = df[df["upso_name"] == upso]
+
+    # img_urls 문자열을 리스트로 변환 (세미콜론 기준 split)
+    matched_df["img_url_list"] = matched_df["img_urls"].apply(
+        lambda x: [url.strip() for url in x.split(";") if url.strip()]
+    )
+
+    # explode로 리스트 내 URL들을 각각 행으로 분해
+    exploded_df = matched_df.explode("img_url_list").reset_index(drop=True)
+
+    # 결과 딕셔너리 변환
+    result = exploded_df[["score", "img_url_list"]].rename(
+        columns={"img_url_list": "img_url"}
+    ).to_dict(orient="records")
+
+    print({"data": result})
     pass

@@ -30,7 +30,20 @@ export const fetchMapData = async (address) => {
 export const fetchMainMap = async (gu = "") => {
   const params = {};
   if (gu) params.gu = gu;
-
+  
   const response = await axios.get(`${API_BASE}/main_map`, { params });
+  return response.data;
+};
+
+export const fetchPhoto = async (upso = "") => {
+  const params = {};
+  if (upso) params.upso = upso;
+  
+  const response = await axios.get(`${API_BASE}/restaurant_photo`, { params });
+  return response.data;
+};
+
+export const fetchStopRestaurant = async () => {
+  const response = await axios.get(`${API_BASE}/tb_restaurant_hygiene`);
   return response.data;
 };

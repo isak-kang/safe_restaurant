@@ -45,7 +45,7 @@ function MainMapPage() {
     setShowDropdown(false);
   };
 
-  // 바깥 클릭 시 드롭다운 닫기
+  // 바깥 클릭 시 드롭다운 닫기d
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -86,7 +86,7 @@ function MainMapPage() {
 
       <Map
         center={center}
-        style={{ width: '100vh', height: '100vh' }}
+        style={{ width: '100vw', height: '400px' }}
         level={5}
       >
         {mapData.map((item, idx) => (

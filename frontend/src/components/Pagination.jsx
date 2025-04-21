@@ -21,7 +21,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   }
 
   return (
-    <BootstrapPagination className="justify-content-center mt-4">
+    <BootstrapPagination className="justify-content-center mt-4" style={{ width: "100vw" }}>
       <BootstrapPagination.Prev
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}

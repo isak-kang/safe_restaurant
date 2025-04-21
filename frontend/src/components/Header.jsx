@@ -5,9 +5,10 @@ function Header() {
   return (
     <header style={styles.header}>
       <div style={styles.title}>안전한식당</div>
-      <Link to={"/"}><div> <img src="/img/home_img.png" alt="옵션" className='filter-img'/></div></Link>
-      <Link to={"/main_map"}><div> <img src="/img/map_img.png" alt="옵션" className='filter-img'/></div></Link>
-      <Link to={"/main_map"}><div> <img src="/img/option_img.png" alt="옵션" className='filter-img'/></div></Link>
+      <Link to={"/"}><div> <img src="/img/home_img.png" alt="메인인" className='filter-img'/></div></Link>
+      <Link to={"/main_map"}><div> <img src="/img/map_img.png" alt="맵맵" className='filter-img'/></div></Link>
+      <Link to={"/"}><div> <img src="/img/option_img.png" alt="옵션" className='filter-img'/></div></Link>
+      <Link to={"/stoprestaurant"}><div> <img src="/img/stop_img.png" alt="행정처분레스토랑" className='filter-img'/></div></Link>
       
       
       
@@ -17,7 +18,8 @@ function Header() {
 
 const styles = {
   header: {
-    width: '100vh',
+    width: '100vw',  
+    maxWidth: '100vw',
     height: '10vh',
     backgroundColor: '#ffffff',
     display: 'flex',
@@ -30,6 +32,7 @@ const styles = {
     top: 0,
     zIndex: 100,
   },
+
   title: {
     fontSize: '20px',
     fontWeight: 'bold',

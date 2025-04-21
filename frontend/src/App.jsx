@@ -3,6 +3,7 @@ import MainPage from "./pages/Main"; // 식당 리스트 있는 메인
 import RestaurantDetail from "./pages/RestaurantDetail";
 import Header from './components/Header';
 import MainMapPage from "./pages/MainMap";
+import StopRestaurant from "./pages/StopRestaurant";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<MainPage />} />
           <Route path="/restaurant/:upso_nm" element={<RestaurantDetail />} />
           <Route path="/main_map" element={<MainMapPage />} />
+          <Route path="/stoprestaurant" element={<StopRestaurant />} />
         </Routes>
       </div>
     </Router>

@@ -57,8 +57,29 @@ def delete_data(table):
         except Exception as e:
             print(f"삭제 중 오류 발생: {str(e)}")
 
+
+def row_insert(query, params):
+    try:
+        with engine.connect() as conn:
+            conn.execute(text(query), params or {})
+            conn.commit()
+            print("쿼리 실행 완료")
+    except Exception as e:
+        print(f"쿼리 실행 실패: {e}")    
+
 if __name__ == "__main__":
-    # table = "model_restaurant_apply"
-    # delete_data(table)
-    print()
-    csv_save("C:/Users/ISAK/Desktop/python/safe_restaurant/crawled_kakao_img_urls.csv","restaurant_images")
+    
+    query = """
+            INSERT INTO user (id, password, name, email, address)
+            VALUES (:id, :password, :name, :email, :address)
+            """
+    data = {
+        "id": "id",
+        "password": "hashed_password",
+        "name": "name",
+        "email": "email",
+        "address": "address"
+    }
+    row_insert(query,data)
+    
+    pass
