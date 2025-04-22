@@ -47,3 +47,69 @@ export const fetchStopRestaurant = async () => {
   const response = await axios.get(`${API_BASE}/tb_restaurant_hygiene`);
   return response.data;
 };
+
+
+export const fetchStopRestaurantByName = async (upso_nm) => {
+  const response = await axios.get(`${API_BASE}/tb_restaurant_hygiene/${encodeURIComponent(upso_nm)}`);
+  return response.data;
+};
+
+
+export const registerUser = async (formData) => {
+  const response = await axios.post(
+    `${API_BASE}/join`,
+    new URLSearchParams(formData),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+  return response.data;
+};
+
+
+export const login = async (formData) => {
+  const response = await axios.post(
+    `${API_BASE}/login`,
+    new URLSearchParams(formData),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+  
+  // 토큰을 로컬 스토리지에 저장
+  if (response.data.access_token) {
+    localStorage.setItem("access_token", response.data.access_token);
+  }
+  
+  return response.data;
+};
+
+
+
+
+// /protected 라우트 호출
+export const getProtectedData = async () => {
+  const token = localStorage.getItem('access_token'); // 로컬 스토리지에서 토큰 가져오기
+  
+  if (!token) {
+    throw new Error('로그인되어 있지 않습니다.'); // 토큰이 없으면 에러 처리
+  }
+  
+  try {
+    const response = await axios.get(`${API_BASE}/protected`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // JWT 토큰을 Authorization 헤더에 담기
+      },
+    });
+    
+    return response.data; // 서버로부터 응답 데이터 반환
+  } catch (error) {
+    console.error('Error fetching protected data:', error);
+    throw error; // 오류 발생 시 처리
+  }
+};
+

@@ -1,11 +1,13 @@
-from fastapi import FastAPI,Query,HTTPException, Path,Form
+from fastapi import FastAPI,Query,HTTPException, Path,Form,Depends
 from typing import List
-
 from fastapi.middleware.cors import CORSMiddleware
 from DataBase.DB import df_load,df_save,row_insert
 from fastapi.responses import JSONResponse
 
-from utils.user import hash_password, verify_password
+from utils.user import hash_password, verify_password,check_duplicate_id,create_access_token,verify_token
+
+import jwt
+from datetime import datetime, timedelta
 
 
 app = FastAPI()
@@ -192,6 +194,60 @@ async def restaurant_photo(upso: str = ""):
 
 
 
+@app.get("/api/tb_restaurant_hygiene")
+async def model_restaurant():
+
+    query = """
+            WITH ranked AS (
+            SELECT CGG_CODE, ADM_DISPO_YMD, GNT_NO, SNT_COB_NM, SNT_UPTAE_NM, UPSO_NM, SITE_ADDR_RD, DRT_INSP_YMD, ADMM_STATE, DISPO_CTN, BAS_LAW, VIOR_YMD, VIOL_CN, DISPO_CTN_DT, TRDP_AREA,
+                    ROW_NUMBER() OVER (PARTITION BY UPSO_NM ORDER BY ADM_DISPO_YMD DESC) AS rn
+            FROM tb_restaurant_hygiene
+            WHERE SNT_UPTAE_NM IN (
+                '한식', '김밥(도시락)', '탕류(보신용)', '경양식', '호프/통닭',
+                '분식', '단란주점', '일식', '기타 휴게음식점', '간이주점',
+                '커피숍', '일반조리판매', '중국식', '식육(숯불구이)',
+                '외국음식전문점(인도,태국등)', '제과점영업', '정종/대포집/소주방',
+                '감성주점', '패밀리레스트랑', '라이브카페', '키즈카페',
+                '냉면집', '떡카페', '뷔페식', '공동탕업', '통닭(치킨)',
+                '까페', '패스트푸드', '스텐드바', '비어(바)살롱',
+                '전통찻집', '과자점', '도시락제조업', '푸드트럭'
+            )
+            )
+            SELECT CGG_CODE, ADM_DISPO_YMD, GNT_NO, SNT_COB_NM, SNT_UPTAE_NM, UPSO_NM, SITE_ADDR_RD, DRT_INSP_YMD, ADMM_STATE, DISPO_CTN, BAS_LAW, VIOR_YMD, VIOL_CN, DISPO_CTN_DT, TRDP_AREA
+            FROM ranked
+            WHERE rn = 1
+            order by ADM_DISPO_YMD desc
+
+            LIMIT 1000;
+            """
+    df = df_load(query)
+
+    df = df.astype(object)
+
+    return df.to_dict(orient="records")
+
+
+
+
+
+@app.get("/api/tb_restaurant_hygiene/{upso_nm}")
+async def model_restaurant(upso_nm: str = Path(..., title="업소명")):
+    query = f"""
+        SELECT *
+        FROM restaurant_hygiene.tb_restaurant_hygiene
+        WHERE UPSO_NM = '{upso_nm}'
+    """
+    df = df_load(query)
+    
+    if df.empty:
+        raise HTTPException(status_code=404, detail="Restaurant not found")
+    
+    # DataFrame을 딕셔너리 리스트 형식으로 변환
+    return df.to_dict(orient='records')
+
+
+
+
 
 @app.post("/api/join")
 async def join(
@@ -205,12 +261,10 @@ async def join(
     if password != confirm_password:
         return {"error": "Passwords do not match."}
 
-    if check_duplicate_id(id):
+    if check_duplicate_id(id) == 1:
         return {"error": "The ID already exists. Please use a different ID."}
 
     hashed_password = hash_password(password)
-
-
     
     query = """
             INSERT INTO user (id, password, name, email, address)
@@ -229,71 +283,40 @@ async def join(
 
 
 
+# 로그인 API 수정
+@app.post("/api/login")
+async def login_api(
+    id: str = Form(...),
+    password: str = Form(...),
+):
+
+    query = "select * from user"
+    login_info = df_load(query)
+    matched_user = login_info[login_info["id"] == id]
+    
+    if matched_user.empty:
+        return JSONResponse(
+            {"error": "없는 아이디입니다."},
+            status_code=400,
+        )
+
+    hashed_password = matched_user["password"].iloc[0]
+
+    if not verify_password(password, hashed_password):
+        return JSONResponse(
+            status_code=400,
+            content={"error": "비밀번호가 일치하지 않습니다."}
+        )
+
+    # 토큰 생성
+    access_token_expires = timedelta(minutes=30)
+    access_token = create_access_token(data={"sub": id}, expires_delta=access_token_expires)
+
+    # 로그인 성공 시 토큰과 함께 사용자 ID 전달
+    return {"message": "로그인 성공", "access_token": access_token, "token_type": "bearer"}
 
 
-
-
-
-
-
-@app.get("/api/tb_restaurant_hygiene")
-async def model_restaurant():
-     
-    query = """
-            SELECT *
-            FROM restaurant_hygiene.tb_restaurant_hygiene
-            WHERE SNT_UPTAE_NM IN (
-                '한식',
-                '김밥(도시락)',
-                '탕류(보신용)',
-                '경양식',
-                '호프/통닭',
-                '분식',
-                '단란주점',
-                '일식',
-                '기타 휴게음식점',
-                '간이주점',
-                '커피숍',
-                '일반조리판매',
-                '중국식',
-                '식육(숯불구이)',
-                '식품소분업',
-                '외국음식전문점(인도,태국등)',
-                '제과점영업',
-                '정종/대포집/소주방',
-                '감성주점',
-                '패밀리레스트랑',
-                '라이브카페',
-                '편의점',
-                '키즈카페',
-                '냉면집',
-                '떡카페',
-                '뷔페식',
-                '공동탕업',
-                '통닭(치킨)',
-                '까페',
-                '백화점',
-                '패스트푸드',
-                '아이스크림',
-                '스텐드바',
-                '비어(바)살롱',
-                '전통찻집',
-                '과자점',
-                '도시락제조업',
-                '푸드트럭',
-                '복어취급',
-                '숙박업(생활)',
-                '집단급식소',
-                '기타 집단급식소',
-                '식품냉동.냉장업'
-                
-            )
-            limit 1000 ;  
-            """
-    df = df_load(query)
-
-    df = df.astype(object)
-
-    return df.to_dict(orient="records")
-
-
+# 보호된 API 예시
+@app.get("/api/protected")
+async def protected_route(current_user: str = Depends(verify_token)):
+    return {"message": f"Hello {current_user}, you have access to this protected route."}

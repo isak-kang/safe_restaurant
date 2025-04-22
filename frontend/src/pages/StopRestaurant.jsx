@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { fetchStopRestaurant } from "../api/api";
 import InfiniteScrollTrigger from "../components/InfiniteScrollTrigger";
-
+import { Link } from "react-router-dom";
 export default function StopRestaurant() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ export default function StopRestaurant() {
   return (
     <div className="container mt-4">
       <h2 className="mb-4">📛 영업정지 / 위반 업소 리스트</h2>
-
+      
       {restaurants.slice(0, visibleCount).map((row, idx) => (
         <div
           key={idx}
@@ -49,32 +49,37 @@ export default function StopRestaurant() {
             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
           }}
         >
-          <div className="card-body" style={{ flex: "1", padding: "1rem" }}>
-            <h5 className="card-title mb-2" style={{ fontWeight: "600" }}>
-              {row.UPSO_NM}
-            </h5>
-            <p className="card-text mb-1" style={{ fontSize: "0.95rem" }}>
-              📍 <strong>주소:</strong> {row.SITE_ADDR_RD || row.SITE_ADDR}
-            </p>
-            <p className="card-text mb-1">
-              <strong>업종:</strong> {row.SNT_UPTAE_NM}
-            </p>
-            <p className="card-text mb-1">
-              <strong>위반 일자:</strong> {row.VIOR_YMD || "미제공"}
-            </p>
-            <p className="card-text mb-1">
-              <strong>위반 내용:</strong> {row.VIOL_CN || "없음"}
-            </p>
-            <p className="card-text mb-1">
-              <strong>조치 내용:</strong> {row.DISPO_CTN || "없음"}
-            </p>
-            <p className="card-text mb-1">
-              <strong>조치 기간:</strong> {row.DISPO_GIGAN || "없음"}
-            </p>
-            <p className="card-text mb-0 text-muted">
-              <small>행정처분일: {row.ADM_DISPO_YMD || "미제공"}</small>
-            </p>
-          </div>
+          <Link
+            to={`/stoprestaurant/${encodeURIComponent(row.UPSO_NM)}`}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <div className="card-body" style={{ flex: "1", padding: "1rem" }}>
+              <h5 className="card-title mb-2" style={{ fontWeight: "600" }}>
+                {row.UPSO_NM}
+              </h5>
+              <p className="card-text mb-1" style={{ fontSize: "0.95rem" }}>
+                📍 <strong>주소:</strong> {row.SITE_ADDR_RD || row.SITE_ADDR}
+              </p>
+              <p className="card-text mb-1">
+                <strong>업종:</strong> {row.SNT_UPTAE_NM}
+              </p>
+              <p className="card-text mb-1">
+                <strong>위반 일자:</strong> {row.VIOR_YMD || "미제공"}
+              </p>
+              <p className="card-text mb-1">
+                <strong>위반 내용:</strong> {row.VIOL_CN || "없음"}
+              </p>
+              <p className="card-text mb-1">
+                <strong>조치 내용:</strong> {row.DISPO_CTN || "없음"}
+              </p>
+              <p className="card-text mb-1">
+                <strong>조치 기간:</strong> {row.DISPO_GIGAN || "없음"}
+              </p>
+              <p className="card-text mb-0 text-muted">
+                <small>행정처분일: {row.ADM_DISPO_YMD || "미제공"}</small>
+              </p>
+            </div>
+          </Link>
         </div>
       ))}
 

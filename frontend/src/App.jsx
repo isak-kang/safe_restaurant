@@ -1,20 +1,39 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import MainPage from "./pages/Main"; // 식당 리스트 있는 메인
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import MainPage from "./pages/Main";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import Header from './components/Header';
 import MainMapPage from "./pages/MainMap";
 import StopRestaurant from "./pages/StopRestaurant";
+import Join from "./pages/Join";
+import Login from "./pages/Login";
+import Test from "./pages/Test";
+import { useState } from "react";
+import HygieneDetailPage from "./pages/HygieneDetailPage";
 
 function App() {
+  const [userId, setUserId] = useState(null); // 로그인 사용자 ID 저장
+
+  // 로그인 성공 콜백
+  const handleLoginSuccess = (user_id) => {
+    console.log("로그인 성공! 유저 ID:", user_id);
+    setUserId(user_id);
+    localStorage.setItem("user_id", user_id);
+    window.location.href = "/"; // ✅ 홈으로 리다이렉트 (useNavigate도 가능)
+  };
+
   return (
     <Router>
-      <Header />  {/* 💡 모든 페이지 위에 항상 고정 표시 */}
-      <div style={{ paddingTop: '60px' }}> {/* 💡 헤더 높이만큼 여백 확보 */}
+      <Header />
+      <div style={{ paddingTop: '60px' }}>
         <Routes>
           <Route path="/" element={<MainPage />} />
           <Route path="/restaurant/:upso_nm" element={<RestaurantDetail />} />
+          <Route path="/stoprestaurant/:upso_nm" element={<HygieneDetailPage />} />
           <Route path="/main_map" element={<MainMapPage />} />
           <Route path="/stoprestaurant" element={<StopRestaurant />} />
+          <Route path="/join" element={<Join />} />
+          <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+          <Route path="/test" element={<Test />} />
         </Routes>
       </div>
     </Router>
