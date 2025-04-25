@@ -9,7 +9,8 @@ import Login from "./pages/Login";
 import Test from "./pages/Test";
 import { useState } from "react";
 import HygieneDetailPage from "./pages/HygieneDetailPage";
-
+import Home from "./pages/Home";
+import Favorite from "./pages/Favorite";
 function App() {
   const [userId, setUserId] = useState(null); // 로그인 사용자 ID 저장
 
@@ -24,9 +25,10 @@ function App() {
   return (
     <Router>
       <Header />
-      <div style={{ paddingTop: '60px' }}>
+      <div>
         <Routes>
-          <Route path="/" element={<MainPage />} />
+          <Route path="/list" element={<MainPage />} />
+          <Route path="/" element={<Home />} />
           <Route path="/restaurant/:upso_nm" element={<RestaurantDetail />} />
           <Route path="/stoprestaurant/:upso_nm" element={<HygieneDetailPage />} />
           <Route path="/main_map" element={<MainMapPage />} />
@@ -34,6 +36,7 @@ function App() {
           <Route path="/join" element={<Join />} />
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/test" element={<Test />} />
+          <Route path="/favorite" element={<Favorite />} />
         </Routes>
       </div>
     </Router>
