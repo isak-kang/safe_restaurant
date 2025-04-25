@@ -7,9 +7,6 @@ button {
 
 
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -58,8 +55,8 @@ button {
 .filter-panel {
   position: fixed;
   top: 0;
-  right: -350px; /* 필터 패널이 화면 밖에 위치하도록 */
-  width: 350px;
+  right: -50%; /* 필터 패널이 화면 밖에 위치하도록 */
+  width: 50%;
   height: 100%;
   background-color: white;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
