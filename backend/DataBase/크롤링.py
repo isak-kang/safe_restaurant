@@ -27,13 +27,10 @@ def crawling_img_url():
     wait = WebDriverWait(driver, 10)
 
     df = df_load("""
-        SELECT UPSO_NM, SITE_ADDR_RD
-        FROM model_restaurant_apply
-        WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
-        ORDER BY ASGN_YMD DESC;
+        SELECT * FROM restaurant_hygiene.model_restaurant_apply2;
     """)
     df['SITE_ADDR_RD'] = df['SITE_ADDR_RD'].str.split(',').str[0]
-    df["img_search_addr"] = df["SITE_ADDR_RD"].fillna('') + "," + df["UPSO_NM"].fillna('')
+    df["img_search_addr"] = df['SITE_ADDR_RD'] + "," + df["upso_nm"]
 
     result = []
     a= 0
@@ -58,8 +55,10 @@ def crawling_img_url():
             if first_place:
                 score_tag = first_place.select_one('.rating > .score > em')
                 link_tag = first_place.select_one('a.numberofscore')
+                name_tag = first_place.select_one('div.head_item.clickArea a[data-id="name"]')
 
                 score = score_tag.text if score_tag else 'N/A'
+                name = name_tag.get_text(strip=True) if name_tag else 'N/A'
                 detail_url = link_tag.get('href') if link_tag else '링크 없음'
                 detail_url = detail_url.split("#")[0] if detail_url != '링크 없음' else detail_url
 
@@ -83,23 +82,39 @@ def crawling_img_url():
                 result.append({
                     "img_search_addr": search_addr,
                     "score": score,
-                    "img_urls": "; ".join(img_urls) if img_urls else '없음'
+                    "img_urls": "; ".join(img_urls) if img_urls else '없음',
+                    'url' : detail_url,
+                    'name' : name
+                    ,'addr' : row["SITE_ADDR_RD"]
+                    ,"upso_nm" : row["upso_nm"]
                 })
                 print({
                     "img_search_addr": search_addr,
                     "score": score,
-                    "img_urls": "; ".join(img_urls) if img_urls else '없음'
+                    "img_urls": "; ".join(img_urls) if img_urls else '없음',
+                    'url' : detail_url
+                    ,'name' : name
+                    ,'addr' : row["SITE_ADDR_RD"]
+                    ,"upso_nm" : row["upso_nm"]
                 })
             else:
                 result.append({
                     "img_search_addr": search_addr,
                     "score": "장소 없음",
-                    "img_urls": "없음"
+                    "img_urls": "없음",
+                    'url' : "없음"
+                    ,'name' : "없음"
+                    ,'addr' : row["SITE_ADDR_RD"]
+                    ,"upso_nm" : row["upso_nm"]
                 })
                 print({
                     "img_search_addr": search_addr,
                     "score": "장소 없음",
-                    "img_urls": "없음"
+                    "img_urls": "없음",
+                    'url' : "없음"
+                    ,'name' : "없음"
+                    ,'addr' : row["SITE_ADDR_RD"]
+                    ,"upso_nm" : row["upso_nm"]
                 })
 
         except Exception as e:
@@ -107,7 +122,10 @@ def crawling_img_url():
             result.append({
                 "img_search_addr": search_addr,
                 "score": "오류",
-                "img_urls": "없음"
+                "img_urls": "없음",
+                'url' : "오류"
+                ,'addr_' : "없음"
+                ,'addr' : row["SITE_ADDR_RD"]
             })
 
     driver.quit()
@@ -218,6 +236,6 @@ def crawling_img_url_save():
 
 if __name__ == "__main__":
 
-    # crawling_img_url()
-    crawling_img_url_save()
+    crawling_img_url()
+    # crawling_img_url_save()
     pass
