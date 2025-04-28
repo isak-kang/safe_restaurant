@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-import { fetchRestaurants, fetchFilterOptions } from "../api/api";
+import { fetchRestaurants, fetchFilterOptions, getProtectedData} from "../api/api";
 import ModelRestaurantCard from "../components/Model_restaurant_card";
 import InfiniteScrollTrigger from "../components/InfiniteScrollTrigger"; // ✅ 추가
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
 
 function Main() {
+  const [user, setUser] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const [restaurants, setRestaurants] = useState([]);
   const [guOptions, setGuOptions] = useState([]);
@@ -89,7 +90,6 @@ function Main() {
     return () => document.removeEventListener("click", handleClickOutside, true);
   }, []);
 
-
   return (
     <div className="container py-4">
       {/* 검색 입력창 */}
@@ -103,12 +103,12 @@ function Main() {
 
       {/* 타이틀 및 필터 버튼 */}
       <h2 className="mb-4 d-flex justify-content-between align-items-center">
-        <span className="mx-auto">📋 모범음식점 리스트</span>
+        <span className="mx-auto">📋 {selectedGu} 모범음식점</span>
         <button onClick={() => setFilterOpen(!filterOpen)} className="btn btn-primary btn-sm w-auto">
           <img src="/img/filtering_img.png" alt="필터링" className="filter-img" />
         </button>
       </h2>
-
+      
       {/* 필터 패널 */}
       <div className={`filter-panel ${filterOpen ? "open" : ""}`} ref={filterRef}>
         <div className="filter-header position-relative mb-3">
@@ -134,7 +134,7 @@ function Main() {
           </div>
 
           <div className="filter-section mb-3">
-            <label className="fw-bold mb-2">업태 선택</label>
+            <label className="fw-bold mb-2">업종 선택</label>
             <div className="btn-group flex-wrap" role="group">
               <button
                 className={`btn btn-outline-success m-1 ${selectedUptae === "" ? "active" : ""}`}

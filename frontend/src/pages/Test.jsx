@@ -1,28 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import { getProtectedData } from '../api/api'; // api 경로 수정 필요
+import React, { useEffect, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Legend, Tooltip, ResponsiveContainer } from 'recharts';
+import axios from 'axios';
 
-function Test() {
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+export default function AnalysisChart() {
+  const [data, setData] = useState([]);
 
   useEffect(() => {
-    const fetchProtectedData = async () => {
-      try {
-        const data = await getProtectedData();
-        setMessage(data.message); // 서버에서 받은 메시지
-      } catch (err) {
-        setError('인증되지 않은 사용자입니다.');
-      }
-    };
-
-    fetchProtectedData(); // 컴포넌트가 마운트될 때 API 호출
+    axios.get('http://localhost:7777/api/analysis')
+    .then(response => {
+      const { model_count = [], disposition_count = [] } = response.data;
+      // 방어코딩: undefined 방지용 기본값 []
+      const map = {};
+      model_count.forEach(({ gu, cnt }) => map[gu] = { gu, model: cnt, disposition: 0 });
+      disposition_count.forEach(({ gu, cnt }) => {
+        if (!map[gu]) map[gu] = { gu, model: 0, disposition: cnt };
+        else map[gu].disposition = cnt;
+      });
+      setData(Object.values(map));
+    })
+    .catch(console.error);
   }, []);
 
   return (
-    <div>
-      <h1>{message || error}</h1> {/* 메시지 또는 오류 메시지 표시 */}
-    </div>
+    <ResponsiveContainer width="100%" height={400}>
+      <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <XAxis dataKey="gu" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Bar dataKey="model" name="모범음식점" fill="#8884d8" />
+        <Bar dataKey="disposition" name="행정처분 업소" fill="#82ca9d" />
+      </BarChart>
+    </ResponsiveContainer>
   );
-}   
-
-export default Test;
+}

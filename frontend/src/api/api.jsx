@@ -12,6 +12,12 @@ export const fetchRestaurants = async (gu = "", uptae = "", name = "") => {
   return response.data;
 };
 
+export const fetchRestaurantsRecommendScore = async () => {
+
+  const response = await axios.get(`${API_BASE}/recommend_score`);
+  return response.data;
+};
+
 export const fetchFilterOptions = async () => {
   const response = await axios.get(`${API_BASE}/filter_options`);
   return response.data;
@@ -106,10 +112,56 @@ export const getProtectedData = async () => {
       },
     });
     
-    return response.data; // 서버로부터 응답 데이터 반환
+    return response.data; // 서버로부터 응답 데이터 반환 data = {user = {"id" : 123}}
   } catch (error) {
     console.error('Error fetching protected data:', error);
     throw error; // 오류 발생 시 처리
   }
 };
 
+// 즐겨찾기 추가
+export const addFavorite = async (upso_nm) => {
+  const token = localStorage.getItem("access_token");
+  if (!token) throw new Error("로그인되어 있지 않습니다.");
+
+  // 서버가 fav: { upso_nm: string } 형태를 기대하므로 객체로 감싸 전달
+  const payload = { upso_nm };
+
+  const response = await axios.post(
+    `${API_BASE}/favorites`,
+    payload,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data; // { message: "즐겨찾기 추가 완료" }
+};
+
+// 즐겨찾기 삭제
+export const deleteFavorite = async (upso_nm) => {
+  const token = localStorage.getItem("access_token");
+  if (!token) throw new Error("로그인되어 있지 않습니다.");
+
+  const response = await axios.delete(
+    `${API_BASE}/favorites/${encodeURIComponent(upso_nm)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data; // { message: "즐겨찾기 삭제 완료" }
+};
+
+// 즐찾 서치
+export const fetchFavorite = async (id) => {
+  const response = await axios.get(`${API_BASE}/favorites_search`, {
+    params: { id },
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("access_token")}`
+    }
+  });
+  return response.data; // [{ id, upso_nm }, ...]
+};
