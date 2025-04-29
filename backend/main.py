@@ -443,8 +443,8 @@ async def model_restaurant_recommend_score():
 
 
 
-@app.get("/api/analysis")
-async def analysis():
+@app.get("/api/analysis_gu")
+async def analysis_gu():
     # 1) 모범음식점 집계
     query1 = """
     SELECT
@@ -472,3 +472,37 @@ async def analysis():
       "model_count": df_model.to_dict(orient="records"),
       "disposition_count": df_dispo.to_dict(orient="records"),
     })
+
+
+@app.get("/api/analysis_viol_cn")
+async def analysis_viol_cn():
+    # 1) 모범음식점 집계
+    query1 = """
+            SELECT 
+                CASE
+                    WHEN (VIOL_CN LIKE '%%위생%%' OR VIOL_CN LIKE '%%혼입%%' OR VIOL_CN LIKE '%%소비기한%%' OR VIOL_CN LIKE '%%불결%%' OR VIOL_CN LIKE '%%이물%%' OR VIOL_CN LIKE '%%청소%%' OR VIOL_CN LIKE '%%불량%%' OR VIOL_CN LIKE '%%마스크%%' OR VIOL_CN LIKE '%%유통기한%%') 
+                        AND VIOL_CN NOT LIKE '%%위생교육%%' THEN '위생 처분'
+                    WHEN VIOL_CN LIKE '%%교육%%' THEN '교육미이수'
+                    WHEN VIOL_CN LIKE '%%확장%%' OR VIOL_CN LIKE '%%면적%%' THEN '무허가 확장'
+                    WHEN VIOL_CN LIKE '%%유흥%%' OR VIOL_CN LIKE '%%성매매%%' THEN '유흥/성매매'
+                    WHEN VIOL_CN LIKE '%%건강%%' OR VIOL_CN LIKE '%%보험%%' THEN '건강, 보험 미등록'
+                    WHEN VIOL_CN LIKE '%%외 영업%%' OR VIOL_CN LIKE '%%외부%%'  OR VIOL_CN LIKE '%%장소 외%%'  OR VIOL_CN LIKE '%%장소가 아닌곳%%' THEN '허가장소 외 외부영업'
+                    WHEN VIOL_CN LIKE '%%청소년%%' THEN '청소년 주류판매'
+                    WHEN VIOL_CN LIKE '%%폐업%%' OR VIOL_CN LIKE '%%철거%%' OR VIOL_CN LIKE '%%폐업 신고안함%%' THEN '폐업신고 안함'
+                    WHEN VIOL_CN LIKE '%%폐기물%%' THEN '폐기물'
+                    WHEN VIOL_CN LIKE '%%원산지%%' THEN '원산지 미표시'
+                    WHEN VIOL_CN LIKE '%%말소%%' or VIOL_CN like '%%사업자등록%%' THEN '사업자등록말소'
+                    WHEN VIOL_CN LIKE '%%노래%%' or VIOL_CN like '%%춤%%' or VIOL_CN like '%%음향%%' or VIOL_CN like '%%반주%%' THEN '노래, 춤 추도록함, 음향기기 설치'
+                    WHEN VIOL_CN like '%%미설치%%' THEN '필수 제품 미설치'
+                    ELSE '기타'
+                END AS violation_category,
+                COUNT(*) AS count
+            FROM restaurant_hygiene.tb_restaurant_hygiene
+            GROUP BY violation_category
+            ORDER BY count DESC;
+    """
+    df = df_load(query1)
+
+    return df.to_dict(orient="records")
+
+

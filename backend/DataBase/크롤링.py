@@ -27,10 +27,11 @@ def crawling_img_url():
     wait = WebDriverWait(driver, 10)
 
     df = df_load("""
-        SELECT * FROM restaurant_hygiene.model_restaurant_apply2;
+        SELECT * FROM restaurant_hygiene.kakao 
+        where score ='장소 없음' and (addr like '서울특별시 마포구%%' or addr like '서울특별시 용산구%%');
     """)
-    df['SITE_ADDR_RD'] = df['SITE_ADDR_RD'].str.split(',').str[0]
-    df["img_search_addr"] = df['SITE_ADDR_RD'] + "," + df["upso_nm"]
+    # df['SITE_ADDR_RD'] = df['SITE_ADDR_RD'].str.split(',').str[0]
+    df["img_search_addr"] = df["upso_nm"]
 
     result = []
     a= 0
@@ -85,7 +86,7 @@ def crawling_img_url():
                     "img_urls": "; ".join(img_urls) if img_urls else '없음',
                     'url' : detail_url,
                     'name' : name
-                    ,'addr' : row["SITE_ADDR_RD"]
+                    ,'addr' : row["addr"]
                     ,"upso_nm" : row["upso_nm"]
                 })
                 print({
@@ -94,7 +95,7 @@ def crawling_img_url():
                     "img_urls": "; ".join(img_urls) if img_urls else '없음',
                     'url' : detail_url
                     ,'name' : name
-                    ,'addr' : row["SITE_ADDR_RD"]
+                    ,'addr' : row["addr"]
                     ,"upso_nm" : row["upso_nm"]
                 })
             else:
@@ -104,7 +105,7 @@ def crawling_img_url():
                     "img_urls": "없음",
                     'url' : "없음"
                     ,'name' : "없음"
-                    ,'addr' : row["SITE_ADDR_RD"]
+                    ,'addr' : row["addr"]
                     ,"upso_nm" : row["upso_nm"]
                 })
                 print({
@@ -113,7 +114,7 @@ def crawling_img_url():
                     "img_urls": "없음",
                     'url' : "없음"
                     ,'name' : "없음"
-                    ,'addr' : row["SITE_ADDR_RD"]
+                    ,'addr' : row["addr"]
                     ,"upso_nm" : row["upso_nm"]
                 })
 
@@ -125,7 +126,7 @@ def crawling_img_url():
                 "img_urls": "없음",
                 'url' : "오류"
                 ,'addr_' : "없음"
-                ,'addr' : row["SITE_ADDR_RD"]
+                ,'addr' : row["addr"]
             })
 
     driver.quit()

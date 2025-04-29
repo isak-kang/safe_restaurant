@@ -165,3 +165,16 @@ export const fetchFavorite = async (id) => {
   });
   return response.data; // [{ id, upso_nm }, ...]
 };
+
+
+
+
+export const fetchAnalysisViolationCategory = async () => {
+  const response = await axios.get(`${API_BASE}/analysis_viol_cn`);
+  return response.data;
+};
+
+export const fetchAnalysisGu = async () => {
+  const response = await axios.get(`${API_BASE}/analysis_gu`);
+  return response.data;
+};

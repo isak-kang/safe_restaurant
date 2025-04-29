@@ -106,12 +106,6 @@ def update_addr_from_csv(csv_path):
     df = pd.read_csv(csv_path)
     df = df[df['addr'].notnull()]
 
-    # 3) img_urls 분리 → explode
-    df['img_list'] = df['img_urls'].str.split(';')
-    df = df.explode('img_list')
-    df['img_url'] = df['img_list'].str.strip()
-    df = df[df['img_url'] != '']
-
     # 4) NaN → None 변환
     df = df.where(pd.notnull(df), None)
 
@@ -119,22 +113,46 @@ def update_addr_from_csv(csv_path):
     with engine.begin() as conn:
         for row in df.itertuples(index=False):
             stmt = text("""
-                UPDATE restaurant_images
-                SET addr = :addr
+                UPDATE kakao
+                SET addr = :addr, url = :url,score = :score
                 WHERE upso_nm = :upso_nm
-                  AND img_urls LIKE :pattern
             """)
             conn.execute(stmt, {
                 'addr':    row.addr,
                 'upso_nm': row.upso_nm,
-                'pattern': f"%{row.img_url}%"
+                'url': row.url,
+                "score" : row.score
             })
+
+def insert_addr_from_csv(csv_path):
+    # 1) CSV 읽기 및 addr null 제거
+    df = pd.read_csv(csv_path)
+    df = df[df['addr'].notnull()]
+
+    # 3) NaN → None 변환
+    df = df.where(pd.notnull(df), None)
+
+    # 4) 트랜잭션 내에서 INSERT
+    with engine.begin() as conn:
+        for row in df.itertuples(index=False):
+            stmt = text("""
+                INSERT INTO kakao (score, url, addr, upso_nm)
+                VALUES (:score, :url, :addr,:upso_nm )
+            """)
+            conn.execute(stmt, {
+                'score': row.score,
+                'url': row.url,
+                'addr': row.addr,
+                'upso_nm' : row.upso_nm
+            })
+
             
 if __name__ == "__main__":
     # table = "model_restaurant_apply2"
     # csv_ = "C:/Users/ISAK/Desktop/python/safe_restaurant/서울시 마포구 모범음식점 지정 현황.csv"
     # csv_2 = "C:/Users/ISAK/Desktop/python/safe_restaurant/서울시 용산구 모범음식점 지정 현황.csv"
-
+    # insert_addr_from_csv('C:/Users/ISAK/Desktop/python/safe_restaurant/crawled_kakao_img_urls.csv')
     # csv_save(csv_2,table)
+    update_addr_from_csv("C:/Users/ISAK/Desktop/python/safe_restaurant/333.csv")
     pass
  
