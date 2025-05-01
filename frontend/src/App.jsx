@@ -6,12 +6,12 @@ import MainMapPage from "./pages/MainMap";
 import StopRestaurant from "./pages/StopRestaurant";
 import Join from "./pages/Join";
 import Login from "./pages/Login";
-import Test from "./pages/Test";
+import { Test,AnalysisViolTTationPage } from "./pages/Analysis";
 import { useState } from "react";
 import HygieneDetailPage from "./pages/HygieneDetailPage";
 import Home from "./pages/Home";
 import Favorite from "./pages/Favorite";
-import AnalysisChart from "./pages/Test";
+// import AnalysisChart from "./pages/Test";
 function App() {
   const [userId, setUserId] = useState(null); // 로그인 사용자 ID 저장
 
@@ -37,7 +37,8 @@ function App() {
           <Route path="/join" element={<Join />} />
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/favorite" element={<Favorite />} />
-          <Route path="/test" element={<AnalysisChart />} />
+          <Route path="/test" element={<Test />} />
+          <Route path="/analysis" element={<AnalysisViolTTationPage />} />
         </Routes>
       </div>
     </Router>

@@ -73,13 +73,16 @@ export default function StopRestaurant() {
   return (
     <div className="container mt-4">
       {/* 검색창 */}
-      <label className="mt-2">음식점 이름</label>
-      <input
-        className="form-control mb-3"
-        value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
-        placeholder="예: 한우"
-      />
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+        <input
+          className="form-control"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="예: 한우"
+          style={{ width: '50vw' }}
+        />
+      </div>
+
 
       {/* 헤더 + 필터 토글 */}
       <h2 className="mb-4 d-flex justify-content-between align-items-center">

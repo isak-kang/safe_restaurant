@@ -114,7 +114,7 @@ def update_addr_from_csv(csv_path):
         for row in df.itertuples(index=False):
             stmt = text("""
                 UPDATE kakao
-                SET addr = :addr, url = :url,score = :score
+                SET addr = :addr, url = :url, score = :score
                 WHERE upso_nm = :upso_nm
             """)
             conn.execute(stmt, {

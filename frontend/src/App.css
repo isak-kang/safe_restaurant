@@ -55,8 +55,8 @@ button {
 .filter-panel {
   position: fixed;
   top: 0;
-  right: -50%; /* 필터 패널이 화면 밖에 위치하도록 */
-  width: 50%;
+  right: -40%; /* 필터 패널이 화면 밖에 위치하도록 */
+  width: 40%;
   height: 100%;
   background-color: white;
   box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);

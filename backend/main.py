@@ -142,37 +142,93 @@ async def get_gocode(address: str):
     }
 
 
-@app.get("/api/main_map")
-async def model_restaurant(gu: str = ""):
-    query1 = f"""SELECT 
-            A.latitude, 
-            A.longitude, 
-            A.SITE_ADDR_RD, 
-            B.upso_nm
-        FROM 
-            tb_map A 
-        JOIN (
-            SELECT DISTINCT 
-                SUBSTRING_INDEX(SITE_ADDR_RD, ',', 1) AS clean_addr, 
-                upso_nm
-            FROM 
-                model_restaurant_apply
-            where ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
-        ) B
-        ON 
-            A.SITE_ADDR_RD = B.clean_addr;"""
-    map_df = df_load(query1)
+# @app.get("/api/main_map")
+# async def main_map(gu: str = "", uptae: str = "", name: str = ""):
+#     query = """
+#     SELECT 
+#       A.latitude, 
+#       A.longitude, 
+#       A.SITE_ADDR_RD,
+#       B.upso_nm,
+#       B.SNT_UPTAE_NM
+#     FROM tb_map A 
+#     JOIN (
+#       SELECT DISTINCT 
+#         SUBSTRING_INDEX(SITE_ADDR_RD, ',', 1) AS clean_addr, 
+#         upso_nm, 
+#         SNT_UPTAE_NM
+#       FROM model_restaurant_apply
+#       WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
+#     ) B
+#       ON A.SITE_ADDR_RD = B.clean_addr;
+#     """
+#     df = df_load(query)
 
-    # 필터링된 주소에서 '구' 정보를 추출하여 addr_gu 컬럼으로 추가합니다.
-    map_df["addr_gu"] = map_df["SITE_ADDR_RD"].apply(
+#     # '구' 정보 추출
+#     df["addr_gu"] = df["SITE_ADDR_RD"].apply(
+#       lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else ""
+#     )
+
+#     # 필터 적용
+#     if gu:
+#         df = df[df["addr_gu"] == gu]
+#     if uptae:
+#         df = df[df["SNT_UPTAE_NM"] == uptae]
+#     if name:
+#         # 부분 일치로 변경
+#         df = df[df["upso_nm"].str.contains(name, case=False, na=False)]
+
+#     return JSONResponse(content=df.to_dict(orient="records"))
+
+@app.get("/api/main_map")
+async def main_map(gu: str = "", uptae: str = "", name: str = "", year_start: str = "", year_end: str = ""):
+    query = """
+    SELECT 
+      A.latitude, 
+      A.longitude, 
+      A.SITE_ADDR_RD,
+      B.upso_nm,
+      B.SNT_UPTAE_NM,
+      B.ASGN_YY,
+      B.MAIN_EDF
+    FROM tb_map A 
+    JOIN (
+      SELECT DISTINCT 
+        SUBSTRING_INDEX(SITE_ADDR_RD, ',', 1) AS clean_addr, 
+        upso_nm, 
+        SNT_UPTAE_NM,
+        ASGN_YY,
+        MAIN_EDF
+      FROM model_restaurant_apply
+      WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
+    ) B
+      ON A.SITE_ADDR_RD = B.clean_addr;
+    """
+    df = df_load(query)
+
+    # '구' 정보 추출
+    df["addr_gu"] = df["SITE_ADDR_RD"].apply(
         lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else ""
     )
-    
+
+    # 필터 적용
     if gu:
-        map_df = map_df[map_df["addr_gu"] == gu]
+        df = df[df["addr_gu"] == gu]
+    if uptae:
+        df = df[df["SNT_UPTAE_NM"] == uptae]
+    if name:
+        df = df[df["upso_nm"].str.contains(name, case=False, na=False)]
+
+    # ✨ 추가: 연도 필터링
+    if year_start and year_end:
+        df = df[
+            (df["ASGN_YY"].astype(str) >= str(year_start)) &
+            (df["ASGN_YY"].astype(str) <= str(year_end))
+        ]
+
+    return JSONResponse(content=df.to_dict(orient="records"))
 
 
-    return JSONResponse(content=map_df.to_dict(orient="records"))
 
 
 @app.get("/api/restaurant_photo")
@@ -475,9 +531,9 @@ async def analysis_gu():
 
 
 @app.get("/api/analysis_viol_cn")
-async def analysis_viol_cn():
+async def analysis_viol_cn(gu : str = ""):
     # 1) 모범음식점 집계
-    query1 = """
+    query1 = f"""
             SELECT 
                 CASE
                     WHEN (VIOL_CN LIKE '%%위생%%' OR VIOL_CN LIKE '%%혼입%%' OR VIOL_CN LIKE '%%소비기한%%' OR VIOL_CN LIKE '%%불결%%' OR VIOL_CN LIKE '%%이물%%' OR VIOL_CN LIKE '%%청소%%' OR VIOL_CN LIKE '%%불량%%' OR VIOL_CN LIKE '%%마스크%%' OR VIOL_CN LIKE '%%유통기한%%') 
@@ -498,6 +554,7 @@ async def analysis_viol_cn():
                 END AS violation_category,
                 COUNT(*) AS count
             FROM restaurant_hygiene.tb_restaurant_hygiene
+            where SITE_ADDR_RD like '%%{gu}%%'
             GROUP BY violation_category
             ORDER BY count DESC;
     """
@@ -506,3 +563,13 @@ async def analysis_viol_cn():
     return df.to_dict(orient="records")
 
 
+@app.get("/api/analysis_year")
+async def analysis_year(gu : str = ""):
+    # 1) 모범음식점 집계
+    query1 = f"""
+        SELECT count(*) as count, year(ADM_DISPO_YMD) as year FROM restaurant_hygiene.tb_restaurant_hygiene where SITE_ADDR_RD like '%%{gu}%%'
+        group by year(ADM_DISPO_YMD) order by year(ADM_DISPO_YMD) desc;
+    """
+    df = df_load(query1)
+
+    return df.to_dict(orient="records")

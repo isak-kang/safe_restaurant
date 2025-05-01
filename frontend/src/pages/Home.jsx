@@ -8,6 +8,7 @@ import {
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
 import { Link } from "react-router-dom";
+import FavoriteButton from "../components/FavoriteButton";
 
 const Home = () => {
   const [user, setUser] = useState(null);
@@ -110,13 +111,14 @@ const Home = () => {
 
   const refreshByType = () => {
     loadByType();
+    
   };
 
   return (
     <div className="container py-4">
-      {/* 지역 기반 */}
+      {user ? (
       <h2 className="text-center mb-3 d-flex justify-content-center gap-2">
-        추천 모범음식점 🍽️
+        {user.address === '그 외' ? '서울 전체를 ' : user.address} 모범음식점 추천🍽️
         <button
           className="btn btn-sm btn-outline-secondary"
           onClick={refreshByRegion}
@@ -125,19 +127,24 @@ const Home = () => {
           🔄
         </button>
       </h2>
-      {user ? (
-        <p className="text-center mb-3">
-          <strong>
-            {/* user.address가 "그 외"면 "전체"로, 아니면 원래 주소로 */}
-            {user.address === '그 외' ? '서울 전체를 ' : user.address}
-          </strong>
-          기준으로 추천드려요!
-        </p>
-      ) : (
-        <p className="text-center text-muted mb-3">
+    ) : (
+      <>
+        <h2 className="text-center mb-2">랜덤 모범음식점 추천
+        <button
+            className="btn btn-sm btn-outline-secondary"
+            onClick={refreshByRegion}
+            title="추천 다시 받기"
+          >
+            🔄
+          </button>
+        </h2>
+        
+        <p className="text-center">
           <Link to="/login">로그인</Link> 하시면 지역 기반 추천을 받아볼 수 있어요.
         </p>
-      )}
+          
+      </>
+    )}
       {error && <div className="alert alert-danger text-center">{error}</div>}
 
       <div className="row gx-3 gy-4 justify-content-center mb-5">
@@ -158,9 +165,19 @@ const Home = () => {
                 <div className="card-body text-center p-2">
                   <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
                   <div><small className="text-muted">{r.addr}</small></div>
-                  <small className="text-muted">{r.SNT_UPTAE_NM}</small>
+                  <small className="text-muted">{r.MAIN_EDF}</small>
                   <div><small className="text-muted">⭐ {r.score}</small></div>
                 </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "4px",               // 카드 내부 상단에서 8px
+                    right: "4px",             // 카드 내부 우측에서 8px
+                    zIndex: 10
+                  }}
+                >
+                  <FavoriteButton upso_nm={r.upso_nm} />
+                </div>                
               </div>
             </Link>
           </div>
@@ -196,9 +213,19 @@ const Home = () => {
                 <div className="card-body text-center p-2">
                   <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
                   <div><small className="text-muted">{r.addr}</small></div>
-                  <small className="text-muted">{r.SNT_UPTAE_NM}</small>
+                  <small className="text-muted">{r.MAIN_EDF}</small>
                   <div><small className="text-muted">⭐ {r.score}</small></div>
                 </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "4px",               // 카드 내부 상단에서 8px
+                    right: "4px",             // 카드 내부 우측에서 8px
+                    zIndex: 10
+                  }}
+                >
+                  <FavoriteButton upso_nm={r.upso_nm} />
+                </div>                
               </div>
             </Link>
           </div>
@@ -234,9 +261,19 @@ const Home = () => {
                 <div className="card-body text-center p-2">
                   <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
                   <div><small className="text-muted">{r.addr}</small></div>
-                  <small className="text-muted">{r.SNT_UPTAE_NM}</small>
+                  <small className="text-muted">{r.MAIN_EDF}</small>
                   <div><small className="text-muted">⭐ {r.score}</small></div>
                 </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "4px",               // 카드 내부 상단에서 8px
+                    right: "4px",             // 카드 내부 우측에서 8px
+                    zIndex: 10
+                  }}
+                >
+                  <FavoriteButton upso_nm={r.upso_nm} />
+                </div>                
               </div>
             </Link>
           </div>

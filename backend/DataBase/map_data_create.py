@@ -104,3 +104,8 @@ def total_map_data_save(query):
 
     except :
         print("map데이터 저장 실패")
+
+
+if __name__ == "__main__":
+    query = "SELECT DISTINCT(SITE_ADDR_RD) FROM restaurant_hygiene.model_restaurant_apply2;"
+    total_map_data_save(query)

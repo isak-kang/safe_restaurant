@@ -94,13 +94,16 @@ function Main() {
     <div className="container py-4">
       {/* 검색 입력창 */}
       <label className="mt-2">음식점 이름</label>
-      <input
-        className="form-control"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="예: 한우"
-      />
-
+      
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+        <input
+          className="form-control"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="예: 한우"
+          style={{ width: '50vw' }}
+        />
+      </div>
       {/* 타이틀 및 필터 버튼 */}
       <h2 className="mb-4 d-flex justify-content-between align-items-center">
         <span className="mx-auto">📋 {selectedGu} 모범음식점</span>

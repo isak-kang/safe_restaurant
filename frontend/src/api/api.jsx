@@ -33,10 +33,24 @@ export const fetchMapData = async (address) => {
   return response.data;
 };
 
-export const fetchMainMap = async (gu = "") => {
+// export const fetchMainMap = async (gu = "", uptae = "", name = "") => {
+//   const params = {};
+//   if (gu)    params.gu    = gu;
+//   if (uptae) params.uptae = uptae;
+//   if (name)  params.name  = name;
+
+//   const response = await axios.get(`${API_BASE}/main_map`, { params });
+//   return response.data;
+// };
+
+export const fetchMainMap = async (gu = "", uptae = "", name = "", year_start = "",year_end="") => {
   const params = {};
-  if (gu) params.gu = gu;
-  
+  if (gu)    params.gu    = gu;
+  if (uptae) params.uptae = uptae;
+  if (name)  params.name  = name;
+  if (year_start)  params.year_start  = year_start;
+  if (year_end)  params.year_end  = year_end;
+
   const response = await axios.get(`${API_BASE}/main_map`, { params });
   return response.data;
 };
@@ -169,12 +183,26 @@ export const fetchFavorite = async (id) => {
 
 
 
-export const fetchAnalysisViolationCategory = async () => {
-  const response = await axios.get(`${API_BASE}/analysis_viol_cn`);
-  return response.data;
-};
 
 export const fetchAnalysisGu = async () => {
   const response = await axios.get(`${API_BASE}/analysis_gu`);
+  return response.data;
+};
+
+
+
+export const fetchAnalysisViolationCategory = async (gu = "") => {
+  const params = {};
+  if (gu) params.gu = gu;
+  
+  const response = await axios.get(`${API_BASE}/analysis_viol_cn`, {params});
+  return response.data;
+};
+
+export const fetchAnalysisYear = async (gu = "") => {
+  const params = {};
+  if (gu) params.gu = gu;
+  
+  const response = await axios.get(`${API_BASE}/analysis_year`, {params});
   return response.data;
 };

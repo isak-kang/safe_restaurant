@@ -52,6 +52,7 @@ export default function RestaurantDetail() {
   if (!restaurant) return <div>로딩 중...</div>;
 
   return (
+
     <div className="p-4">
 
       {/* <button
@@ -82,8 +83,8 @@ export default function RestaurantDetail() {
           />
         </div>
       )}
-
-      {/* 매장 사진 */}
+    {/* 매장 사진 */}
+    
       {photos.length > 0 && (
         <div className="mt-4">
           <h4>매장 사진</h4>
@@ -93,7 +94,7 @@ export default function RestaurantDetail() {
                 key={idx}
                 src={url === "없음" ? "/img/no_img.png" : url}
                 alt={`매장사진${idx}`}
-                style={{ width: '25%', borderRadius: '5px', cursor: 'pointer' }}
+                style={{ width: '20%', borderRadius: '5px', cursor: 'pointer' }}
                 onClick={() => {
                   setSelectedPhoto(url);
                   setIsModalOpen(true);
@@ -135,5 +136,6 @@ export default function RestaurantDetail() {
         </div>
       )}
     </div>
+
   );
 }
