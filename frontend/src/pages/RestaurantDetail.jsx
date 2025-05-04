@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchRestaurantByName, fetchMapData, fetchPhoto } from "../api/api";
+import { fetchRestaurantByName, fetchMapData, fetchPhoto,fetchSimilarRestaurant } from "../api/api";
 import KakaoMap from '../components/KakaoMap';
 import FavoriteButton from "../components/FavoriteButton";  // 추가
-
+import { Link } from 'react-router-dom';
 export default function RestaurantDetail() {
   const { upso_nm } = useParams();
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ export default function RestaurantDetail() {
   const [score, setScore] = useState(null);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [similarRestaurants, setSimilarRestaurants] = useState([]);
 
   // 업소 정보
   useEffect(() => {
@@ -45,6 +46,14 @@ export default function RestaurantDetail() {
           setPhotos([]);
           setScore(null);
         });
+    }
+  }, [upso_nm]);
+
+  useEffect(() => {
+    if (upso_nm) {
+      fetchSimilarRestaurant(upso_nm)
+        .then(setSimilarRestaurants)
+        .catch(() => setSimilarRestaurants([]));
     }
   }, [upso_nm]);
 
@@ -83,27 +92,103 @@ export default function RestaurantDetail() {
           />
         </div>
       )}
-    {/* 매장 사진 */}
-    
       {photos.length > 0 && (
         <div className="mt-4">
-          <h4>매장 사진</h4>
-          <div className="d-flex flex-wrap gap-3">
+          <h4 className="text-center">매장 사진</h4>
+
+          {/* 사진틀 - 가운데 정렬, 가로 50% */}
+          <div
+            style={{
+              width: '100%',
+              margin: '0 auto', // 가운데 정렬
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              backgroundColor: '#f8f8f8',
+              padding: '1rem',
+              borderRadius: '12px',
+              border: '1px solid #ccc'
+            }}
+          >
             {photos.map((url, idx) => (
               <img
                 key={idx}
                 src={url === "없음" ? "/img/no_img.png" : url}
                 alt={`매장사진${idx}`}
-                style={{ width: '20%', borderRadius: '5px', cursor: 'pointer' }}
+                style={{
+                  width: '25%',
+                  height: '25%',
+                  objectFit: 'contain',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
                 onClick={() => {
                   setSelectedPhoto(url);
                   setIsModalOpen(true);
                 }}
               />
             ))}
+          
           </div>
+          <div>            
+          {similarRestaurants.length > 0 && (
+  <div className="mt-5">
+    <h4 className="text-center mb-4">🔍 유사한 매장 추천</h4>
+
+    <div className="row gx-3 gy-4 justify-content-center">
+      {similarRestaurants.map((r, i) => (
+        <div className="col-6 col-md-3" key={i}>
+          <Link
+            to={`/restaurant/${encodeURIComponent(r.upso_nm)}`}
+            target="_blank"
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <div className="card shadow-sm rounded-4 h-100 position-relative">
+              <img
+                src={r.img_url || "/img/no_img.png"}
+                alt={r.upso_nm}
+                className="card-img-top rounded-top-4"
+                style={{ height: "180px", objectFit: "cover" }}
+              />
+              <div className="card-body text-center p-2">
+                <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
+                <div>
+                  <small className="text-muted">{r.SITE_ADDR_RD}</small>
+                </div>
+                <small className="text-muted">{r.MAIN_EDF}</small>
+                {r.score && (
+                  <div>
+                    <small className="text-muted">⭐ {r.score}</small>
+                  </div>
+                )}
+                <p style={{ fontSize: '0.85rem', color: '#888' }}>
+                  유사도 등급: {r.rank_score}
+                </p>
+
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "4px",
+                  right: "4px",
+                  zIndex: 10
+                }}
+              >
+                <FavoriteButton upso_nm={r.upso_nm} />
+              </div>
+            </div>
+          </Link>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+          </div>
+
         </div>
       )}
+
 
       {/* 사진 모달 */}
       {isModalOpen && (
