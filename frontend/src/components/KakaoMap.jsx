@@ -8,7 +8,7 @@ function KakaoMap(props) {
     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
     <Map
       center={{ lat: latitude, lng: longitude }}
-      style={{ width: '50%', height: '400px' }}
+      style={{ width: '100%', height: '400px' }}
       level={3}
     >
       <MapMarker position={{ lat: latitude, lng: longitude }}>
