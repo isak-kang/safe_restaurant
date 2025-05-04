@@ -1,46 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Map, MapMarker, MarkerClusterer } from 'react-kakao-maps-sdk';
+import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import { fetchFilterOptions, fetchMainMap } from '../api/api';
 import { Link } from 'react-router-dom';
-
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 
-
 export default function MainMapPage() {
-  // 필터 옵션
   const [guOptions, setGuOptions] = useState([]);
   const [uptaeOptions, setUptaeOptions] = useState([]);
-
-  // “적용된” 필터
-  const [appliedGu, setAppliedGu]         = useState('');
-  const [appliedUptae, setAppliedUptae]     = useState('');
-  const [appliedName, setAppliedName]       = useState('');
+  const [appliedGu, setAppliedGu] = useState('');
+  const [appliedUptae, setAppliedUptae] = useState('');
+  const [appliedName, setAppliedName] = useState('');
   const [appliedYearStart, setAppliedYearStart] = useState(1987);
-  const [appliedYearEnd, setAppliedYearEnd]   = useState(2025);
-
-  // “입력 중” 임시값
-  const [tempGu, setTempGu]           = useState('');
-  const [tempUptae, setTempUptae]       = useState('');
-  const [tempName, setTempName]         = useState('');
-  const [tempYearStart, setTempYearStart] = useState(1987);
-  const [tempYearEnd, setTempYearEnd]     = useState(2025);
-
-  // 슬라이더 열기/닫기 토글
-  const [panelOpen, setPanelOpen]       = useState(true);
-
-  const [openGu, setOpenGu]         = useState(true);
-  const [openUptae, setOpenUptae]     = useState(true);
-  const [openYear, setOpenYear]     = useState(true);
-
-
-  // 지도 데이터
-  const [mapData, setMapData]         = useState([]);
-  const [center, setCenter]           = useState({ lat: 37.5665, lng: 126.9780 });
+  const [appliedYearEnd, setAppliedYearEnd] = useState(2025);
+  const [tempName, setTempName] = useState('');
+  const [mapData, setMapData] = useState([]);
+  const [center, setCenter] = useState({ lat: 37.5665, lng: 126.9780 });
   const [selectedMarker, setSelectedMarker] = useState(null);
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [showFilters, setShowFilters] = useState(true);
 
-
-  // 1) 구/업태 불러오기
   useEffect(() => {
     fetchFilterOptions().then(res => {
       setGuOptions(res.guOptions);
@@ -48,16 +27,12 @@ export default function MainMapPage() {
     });
   }, []);
 
-  // 2) “적용된” 필터가 바뀔 때마다 재조회
   useEffect(() => {
-    // 초기 상태에서는 아무 필터도 안 넣었을 경우 마커 표시하지 않음
     const isInitial = !appliedGu && !appliedUptae && !appliedName && appliedYearStart === 1987 && appliedYearEnd === 2025;
-  
     if (isInitial) {
       setMapData([]);
       return;
     }
-  
     fetchMainMap(appliedGu, appliedUptae, appliedName, appliedYearStart, appliedYearEnd)
       .then(data => {
         setMapData(data);
@@ -67,11 +42,16 @@ export default function MainMapPage() {
       })
       .catch(console.error);
   }, [appliedGu, appliedUptae, appliedName, appliedYearStart, appliedYearEnd]);
-  
+
+
+  const handleSearch = () => {
+    setAppliedName(tempName);
+    setShowFilters(false);
+  };  
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100vh', overflow: 'hidden' }}>
-      {/* 좌측 패널 */}
+      {/* 왼쪽 패널 */}
       <div
         style={{
           position: 'fixed', top: '10vh', left: panelOpen ? 0 : '-35%',
@@ -84,7 +64,7 @@ export default function MainMapPage() {
           &times;
         </button>
 
-        {/* 이름 검색 */}
+        {/* 검색 */}
         <h5>🖊️ 업소 이름</h5>
         <input
           type="text"
@@ -92,157 +72,134 @@ export default function MainMapPage() {
           onChange={e => setTempName(e.target.value)}
           onKeyDown={e => {
             if (e.key === 'Enter') {
-              setAppliedName(tempName);
+              handleSearch();
             }
-          }}
-          placeholder="예: 한우"
+          }}          placeholder="예: 한우"
           style={{ width: '100%', padding: '.5rem', marginBottom: '.5rem' }}
         />
         <button
           className="btn btn-outline-primary mb-3 w-100"
-          onClick={() => setAppliedName(tempName)}
+          onClick={() => handleSearch()
+          }
         >
           검색
-</button>
+        </button>
 
-        {/* ── 2) 구 선택 섹션 ─────────────────────── */}
-        <div>
-          <h5 onClick={() => setOpenGu(o => !o)} style={{ cursor: 'pointer' }}>
-            📍 구 선택 {openGu ? '▾' : '▸'}
-          </h5>
-          {openGu && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <button
-                onClick={() => setAppliedGu('')}
-                className={appliedUptae === '' ? 'btn btn-danger' : 'btn btn-outline-danger'}  // 🔴 여기 변경
-                >
-                초기화
-              </button>
+        {/* 필터 토글 버튼 */}
+        <button
+          className="btn btn-outline-secondary mb-3 w-100"
+          onClick={() => setShowFilters(v => !v)}
+        >
+          {showFilters ? '필터 닫기 ▲' : '필터 열기 ▼'}
+        </button>
+
+        {/* 필터 영역 */}
+        {showFilters && (
+          <>
+            {/* 구 선택 */}
+            <h5>📍 구 선택</h5>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+              <button onClick={() => setAppliedGu('')} className={appliedGu === '' ? 'btn btn-danger' : 'btn btn-outline-danger'}>초기화</button>
               {guOptions.map(gu => (
-              <button
-                key={gu}
-                onClick={() => setAppliedGu(gu)}
-                className={appliedGu === gu ? 'btn btn-primary' : 'btn btn-outline-primary'}
-              >
-                {gu}
-              </button>
-            ))}
-            </div>
-          )}
-        </div>
-
-        <hr/>
-
-        {/* ── 3) 업태 선택 섹션 ───────────────────── */}
-        <div>
-          <h5 onClick={() => setOpenUptae(o => !o)} style={{ cursor: 'pointer' }}>
-            🍴 업태 선택 {openUptae ? '▾' : '▸'}
-          </h5>
-          {openUptae && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <button
-                onClick={() => setAppliedUptae('')}
-                className={appliedUptae === '' ? 'btn btn-danger' : 'btn btn-outline-danger'}  // 🔴 여기 변경
-                >
-                초기화
-              </button>
-              {uptaeOptions.map(ut => (
-                <button
-                  key={ut}
-                  onClick={() => setAppliedUptae(ut)}
-                  className={appliedUptae === ut ? 'btn btn-success' : 'btn btn-outline-success'}
-                >
-                  {ut}
-                </button>
+                <button key={gu} onClick={() => setAppliedGu(gu)} className={appliedGu === gu ? 'btn btn-primary' : 'btn btn-outline-primary'}>{gu}</button>
               ))}
             </div>
-          )}
 
-        </div>
-      
-<hr/>
+            {/* 업태 선택 */}
+            <h5>🍴 업태 선택</h5>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+              <button onClick={() => setAppliedUptae('')} className={appliedUptae === '' ? 'btn btn-danger' : 'btn btn-outline-danger'}>초기화</button>
+              {uptaeOptions.map(ut => (
+                <button key={ut} onClick={() => setAppliedUptae(ut)} className={appliedUptae === ut ? 'btn btn-success' : 'btn btn-outline-success'}>{ut}</button>
+              ))}
+            </div>
 
-        {/* 연도 범위 슬라이더 */}
+            {/* 연도 슬라이더 */}
+            <h5>📅 연도 범위</h5>
+            <Slider
+              range
+              min={1987}
+              max={2025}
+              allowCross={false}
+              value={[appliedYearStart, appliedYearEnd]}
+              onChange={([start, end]) => {
+                setAppliedYearStart(start);
+                setAppliedYearEnd(end);
+              }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+              <small>{appliedYearStart}년</small>
+              <small>{appliedYearEnd}년</small>
+            </div>
+          </>
+        )}
 
-          <h5 onClick={() => setOpenYear(o => !o)} style={{ cursor: 'pointer' }}>
-            🍴 연도 {openYear ? '▾' : '▸'}
-          </h5>
-          {openYear && (
-            <>
-              <h5>📅 지정 연도</h5>
-              <div style={{ margin: '1rem 0' }}>
-                <Slider
-                  range
-                  min={1987}
-                  max={2025}
-                  allowCross={false}
-                  value={[appliedYearStart, appliedYearEnd]}
-                  onChange={(value) => {
-                    const [start, end] = value;
-                    setAppliedYearStart(start);
-                    setAppliedYearEnd(end);
-                  }}
-                />
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  marginTop: '0.5rem'
-                }}>
-                  <small>{appliedYearStart}년</small>
-                  <small>{appliedYearEnd}년</small>
+        {/* 검색 결과 */}
+        {mapData.length > 0 && (
+          <div>
+            {mapData.map((item, i) => (
+            <Link
+              to={`/restaurant/${encodeURIComponent(item.upso_nm)}`}
+              target="_blank"
+              style={{ textDecoration: "none", color: "inherit" }
+            }
+            >
+              <div key={i} className="card mb-2 p-2 shadow-sm" style={{ display: 'flex', gap: '1rem' }}>
+                {/* 이미지 썸네일 */}
+                {item.img_url && (
+                  <img
+                    src={item.img_url}
+                    alt={item.upso_nm}
+                    style={{ width: '100%', height: '200px', objectFit: 'contain', borderRadius: '6px' }}
+                  />
+                )}
+                
+                {/* 텍스트 정보 */}
+                <div style={{ flex: 1 }}>
+                  <strong>{item.upso_nm} ({item.ASGN_YY})</strong>
+                  <div style={{ fontSize: '0.9rem' }}>{item.SITE_ADDR_RD}</div>
+                  <div style={{ fontSize: '0.9rem' }}>주메뉴: {item.MAIN_EDF}</div>
+                  <div style={{ fontSize: '0.9rem' }}>평점: ⭐ {item.score}</div>
+                  <button
+                    className="btn btn-sm btn-outline-primary mt-1"
+                    onClick={() => {
+                      setCenter({ lat: item.latitude, lng: item.longitude });
+                      setSelectedMarker(i);
+                    }}
+                  >
+                    지도에서 보기
+                  </button>
                 </div>
               </div>
-
-            </>
-          )}
-          <br></br>
-          <br></br>
+              </Link>
+            ))}
           </div>
+        )}
+      </div>
 
-      {/* 카카오맵 */}
+      {/* 지도 */}
       <Map
         center={center}
         style={{ width: '100%', height: '100%' }}
         level={7}
         minLevel={7}
-        onClick={() => setSelectedMarker(null)}  // 🔍 지도 클릭 시 마커 선택 해제
+        onClick={() => setSelectedMarker(null)}
       >
         {mapData.map((item, i) => (
           <MapMarker
             key={i}
             position={{ lat: item.latitude, lng: item.longitude }}
-            onClick={(e) => {
-              setSelectedMarker(i);
-            }}
+            onClick={() => setSelectedMarker(i)}
           >
             {selectedMarker === i && (
-              <div style={{
-                background:'#fff',
-                padding:'5px 8px',
-                borderRadius:'5px',
-                boxShadow:'0 0 6px rgba(0,0,0,0.2)',
-                whiteSpace:'nowrap'
-              }}>
+              <div style={{ background:'#fff', padding:'5px 8px', borderRadius:'5px', boxShadow:'0 0 6px rgba(0,0,0,0.2)', whiteSpace:'nowrap' }}>
                 <div>{item.upso_nm} ({item.ASGN_YY})</div>
                 <div>주소 : {item.SITE_ADDR_RD}</div>
                 <div>주메뉴 : {item.MAIN_EDF}</div>
                 <Link
                   to={`/restaurant/${encodeURIComponent(item.upso_nm)}`}
                   target="_blank"
-                  style={{
-                    display: 'inline-block',
-                    marginTop: '6px',
-                    padding: '6px 12px',
-                    backgroundColor: '#007bff',
-                    color: '#fff',
-                    fontWeight: 'bold',
-                    fontSize: '13px',
-                    borderRadius: '4px',
-                    textAlign: 'center',
-                    textDecoration: 'none',
-                    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-                    transition: 'background-color 0.2s',
-                  }}
+                  style={{ display: 'inline-block', marginTop: '6px', padding: '6px 12px', backgroundColor: '#007bff', color: '#fff', fontWeight: 'bold', fontSize: '13px', borderRadius: '4px', textAlign: 'center', textDecoration: 'none', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', transition: 'background-color 0.2s' }}
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
                 >
@@ -254,22 +211,54 @@ export default function MainMapPage() {
         ))}
       </Map>
 
-
-      {/* 패널 토글 */}
-      <button
-        onClick={() => setPanelOpen(v => !v)}
-        style={{
-          position:'fixed', bottom:'1.5rem', left:'1.5rem',
-          width:'48px', height:'48px', borderRadius:'50%',
-          border:'none', background:'#007bff', color:'#fff',
-          fontSize:'1.5rem', cursor:'pointer', boxShadow:'0 4px 12px rgba(0,0,0,0.2)',
-          zIndex:901
-        }}
-        aria-label="필터 토글"
+      {/* 패널 열기 버튼 */}
+      {!panelOpen && (
+        <button
+          onClick={() => setPanelOpen(true)}
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: 0,
+            zIndex: 901,
+            background: '#007bff',
+            color: '#fff',
+            border: 'none',
+            padding: '0.5rem 1rem',
+            borderRadius: '0 6px 6px 0',
+            cursor: 'pointer',
+            transform: 'translateY(-50%)',
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+          }}
         >
-        🏷️
-      </button>
+          검색창 열기
+        </button>
+      )}
+
+      {/* 패널 닫기 버튼 */}
+      {panelOpen && (
+        <button
+          onClick={() => setPanelOpen(false)}
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '35%',
+            zIndex: 901,
+            background: '#007bff',
+            color: '#fff',
+            border: 'none',
+            padding: '0.5rem 1rem',
+            borderRadius: '0 6px 6px 0',
+            cursor: 'pointer',
+            transform: 'translateY(-50%)',
+            writingMode: 'vertical-rl',
+            textOrientation: 'mixed',
+          }}
+        >
+          검색창 닫기
+        </button>
+      )}
+
     </div>
-    
   );
 }
