@@ -5,6 +5,8 @@ from DataBase.DB import df_load,df_save,row_insert,delete_data
 from fastapi.responses import JSONResponse
 import pandas as pd
 from utils.user import hash_password, verify_password,check_duplicate_id,create_access_token,verify_token
+from utils.weather import recommend_food_by_weather,weather_data
+from utils.similar_restaurant import rank_upso
 
 import jwt
 from datetime import datetime, timedelta
@@ -22,7 +24,7 @@ app.add_middleware(
 )
 
 @app.get("/api/model_restaurant")
-async def model_restaurant(gu: str = "", uptae: str = "", name: str = ""):
+async def model_restaurant(gu: str = "", uptae: str = "", name: str = "", year_end : str = "", year_start : str = ""):
     # 음식점 정보 조회
     query = """
         SELECT 
@@ -70,6 +72,12 @@ async def model_restaurant(gu: str = "", uptae: str = "", name: str = ""):
         df = df[df["SNT_UPTAE_NM"] == uptae]
     if name:
         df = df[df["upso_nm"].str.contains(name, case=False, na=False)]
+
+    if year_start and year_end:
+        df = df[
+            (df["ASGN_YY"].astype(str) >= str(year_start)) &
+            (df["ASGN_YY"].astype(str) <= str(year_end))
+        ]
     
     # 응답 형식 정리   
     response = df[[
@@ -82,6 +90,7 @@ async def model_restaurant(gu: str = "", uptae: str = "", name: str = ""):
         "img_url",
         "addr",
         "MAIN_EDF",
+        "ASGN_YY",
         "score"
     ]].fillna("").to_dict(orient="records")
     return JSONResponse(content=response)
@@ -206,6 +215,26 @@ async def main_map(gu: str = "", uptae: str = "", name: str = "", year_start: st
     """
     df = df_load(query)
 
+        # 이미지 정보 조회
+    query2 = "SELECT A.upso_nm, A.img_urls, B.score, A.addr FROM restaurant_hygiene.restaurant_images A join kakao B on A.id = B.id;"
+    df_photo = df_load(query2)
+    # print(df_photo)
+    # 이미지 이름 정제 및 추출
+    df_photo["img_url"] = df_photo["img_urls"].apply(lambda x: x.split(";")[0].strip())
+
+    # 음식점 이름 정제 후 조인 기준 열 생성
+    df["normalized_upso"] = df["upso_nm"].str.replace(" ", "").str.lower()
+    df_photo["normalized_upso"] = df_photo["upso_nm"].str.replace(" ", "").str.lower()
+
+    df_photo['SITE_ADDR_RD'] = df_photo['addr']
+    df['SITE_ADDR_RD'] = df['SITE_ADDR_RD'].apply(lambda x: x.split(",")[0])
+    # 이미지 URL 병합
+    df = df.merge(
+    df_photo[["normalized_upso", "SITE_ADDR_RD", "img_url", "score"]],
+    how="left",
+    on=["normalized_upso", "SITE_ADDR_RD"]
+)
+
     # '구' 정보 추출
     df["addr_gu"] = df["SITE_ADDR_RD"].apply(
         lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else ""
@@ -278,7 +307,6 @@ async def model_restaurant():
             FROM ranked
             WHERE rn = 1
             order by ADM_DISPO_YMD desc
-            limit 3000
             ;
             """
     df = df_load(query)
@@ -568,8 +596,132 @@ async def analysis_year(gu : str = ""):
     # 1) 모범음식점 집계
     query1 = f"""
         SELECT count(*) as count, year(ADM_DISPO_YMD) as year FROM restaurant_hygiene.tb_restaurant_hygiene where SITE_ADDR_RD like '%%{gu}%%'
-        group by year(ADM_DISPO_YMD) order by year(ADM_DISPO_YMD) desc;
+        group by year(ADM_DISPO_YMD) order by year(ADM_DISPO_YMD);
     """
     df = df_load(query1)
 
     return df.to_dict(orient="records")
+
+
+@app.get("/api/weather_food_recommend")
+async def weather_food_recommed():
+
+    weather = weather_data()
+    food_info = recommend_food_by_weather(weather)
+    keywords = food_info["recommend"]
+
+    if not keywords:
+        return JSONResponse(content={"error": "추천 음식 없음"}, status_code=400)
+
+    # SQL WHERE 조건 생성
+    like_conditions = " OR ".join([f"MAIN_EDF LIKE '%%{kw}%%'" for kw in keywords])
+    query = f"""
+        SELECT *
+        FROM restaurant_hygiene.model_restaurant_apply
+        WHERE ({like_conditions})
+        and ASGN_YMD != '' AND ASGN_CANCEL_YMD = '';
+    """
+
+    df = df_load(query)
+
+    query2 = "SELECT A.upso_nm, A.img_urls, B.score, A.addr FROM restaurant_hygiene.restaurant_images A join kakao B on A.id = B.id where (score >= 4.0);"
+    df_photo = df_load(query2)
+    # print(df_photo)
+    # 이미지 이름 정제 및 추출
+    df_photo["img_url"] = df_photo["img_urls"].apply(lambda x: x.split(";")[0].strip())
+
+    # 음식점 이름 정제 후 조인 기준 열 생성
+    df["normalized_upso"] = df["upso_nm"].str.replace(" ", "").str.lower()
+    df_photo["normalized_upso"] = df_photo["upso_nm"].str.replace(" ", "").str.lower()
+
+    df_photo['SITE_ADDR_RD'] = df_photo['addr']
+    df['SITE_ADDR_RD'] = df['SITE_ADDR_RD'].apply(lambda x: x.split(",")[0])
+    # 이미지 URL 병합
+    df = df.merge(
+    df_photo[["normalized_upso", "SITE_ADDR_RD", "img_url", "score"]],
+    how="left",
+    on=["normalized_upso", "SITE_ADDR_RD"]
+)
+        # 주소 필터용 행정동 추출
+    df["addr"] = df["SITE_ADDR_RD"].apply(lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else "")
+
+    
+    df = df[df["score"].notna()]
+
+    return {
+        "condition": food_info["condition"],
+        "memo": food_info["memo"],
+        "recommend": keywords,
+        "restaurants": df.to_dict(orient="records")
+    }
+
+
+
+
+@app.get("/api/similar_restaurant_recommendations")
+async def similar_restaurant_recommendations(upso_nm : str = ""):
+    query = """
+    SELECT 
+        *
+    FROM model_restaurant_apply
+    WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
+    ORDER BY ASGN_YMD DESC;
+    """
+    df = df_load(query)
+
+    # 이미지 정보 조회
+    query2 = "SELECT A.upso_nm, A.img_urls, B.score, A.addr FROM restaurant_hygiene.restaurant_images A join kakao B on A.id = B.id;"
+    df_photo = df_load(query2)
+    # print(df_photo)
+    # 이미지 이름 정제 및 추출
+    df_photo["img_url"] = df_photo["img_urls"].apply(lambda x: x.split(";")[0].strip())
+
+    # 음식점 이름 정제 후 조인 기준 열 생성
+    df["normalized_upso"] = df["upso_nm"].str.replace(" ", "").str.lower()
+    df_photo["normalized_upso"] = df_photo["upso_nm"].str.replace(" ", "").str.lower()
+
+    df_photo['SITE_ADDR_RD'] = df_photo['addr']
+    df['SITE_ADDR_RD'] = df['SITE_ADDR_RD'].apply(lambda x: x.split(",")[0])
+    # 이미지 URL 병합
+    df = df.merge(
+    df_photo[["normalized_upso", "SITE_ADDR_RD", "img_url", "score"]],
+    how="left",
+    on=["normalized_upso", "SITE_ADDR_RD"]
+    )
+
+    # 주소 필터용 행정동 추출
+    df["addr"] = df["SITE_ADDR_RD"].apply(lambda x: x.split(" ")[1] if isinstance(x, str) and len(x.split(" ")) > 1 else "")
+
+    # 1. 데이터 불러오기
+    target_name = upso_nm
+
+    # 2. 기준 업소 정보 추출
+    base = df[df["upso_nm"] == target_name].iloc[0]
+
+    base_admdng = base["ADMDNG_NM"]
+    base_main_edf = base["MAIN_EDF"]
+    base_snt_uptae = base["SNT_UPTAE_NM"]
+    base_cgg_code = base["CGG_CODE"]
+
+
+    # 4. 유사도 점수 부여
+    related = df[df["upso_nm"] != target_name].copy()
+    related["rank_score"] = related.apply(
+    lambda row: rank_upso(
+        row,
+        base_main_edf,
+        base_admdng,
+        base_snt_uptae,
+        base_cgg_code
+    ),
+    axis=1
+)
+
+
+    # 5. 관련 업소 정렬 및 상위 10개 추출
+    related_sorted = related[related["rank_score"] < 99].sort_values(["rank_score", "ASGN_YMD"], ascending=[True, False])
+    top_related = related_sorted.head(4)
+
+    return top_related.to_dict(orient="records")
+
+
