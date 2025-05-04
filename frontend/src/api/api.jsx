@@ -2,11 +2,13 @@ import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_BACKEND_ADDR;
 
-export const fetchRestaurants = async (gu = "", uptae = "", name = "") => {
+export const fetchRestaurants = async (gu = "", uptae = "", name = "", year_end = "",year_start = "" ) => {
   const params = {};
   if (gu) params.gu = gu;
   if (uptae) params.uptae = uptae;
   if (name) params.name = name;
+  if (year_end)  params.year_end  = year_end;
+  if (year_start)  params.year_start  = year_start;
 
   const response = await axios.get(`${API_BASE}/model_restaurant`, { params });
   return response.data;
@@ -204,5 +206,22 @@ export const fetchAnalysisYear = async (gu = "") => {
   if (gu) params.gu = gu;
   
   const response = await axios.get(`${API_BASE}/analysis_year`, {params});
+  return response.data;
+};
+
+
+
+
+
+export const fetchWeatherRecommend = async () => {
+  const response = await axios.get(`${API_BASE}/weather_food_recommend`);
+  return response.data;
+};
+
+
+export const fetchSimilarRestaurant = async (upso_nm) => {
+  const response = await axios.get(`${API_BASE}/similar_restaurant_recommendations`, {
+    params: { upso_nm },
+  });
   return response.data;
 };
