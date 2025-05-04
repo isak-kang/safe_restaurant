@@ -3,7 +3,8 @@ import {
   getProtectedData,
   fetchRestaurants,
   fetchRestaurantsRecommendScore,
-  fetchFilterOptions
+  fetchFilterOptions,
+  fetchWeatherRecommend
 } from "../api/api";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
@@ -14,6 +15,10 @@ const Home = () => {
   const [user, setUser] = useState(null);
   const [byRegion, setByRegion] = useState([]);
   const [byScore, setByScore] = useState([]);
+  const [byWeather, setByWeather] = useState([]);
+  const [weatherMemo, setWeatherMemo] = useState("");
+  const [weatherCondition, setWeatherCondition] = useState("");
+  const [weatherMenu, setWeatherMenu] = useState([]);
   const [byType, setByType] = useState([]);
   const [uptaeOptions, setUptaeOptions] = useState([]);
   const [error, setError] = useState("");
@@ -72,7 +77,7 @@ const Home = () => {
       setError("평점 기반 추천을 불러오는 중 오류가 발생했습니다.");
     }
   };
-
+  
   useEffect(() => {
     loadByScore();
   }, []);
@@ -113,6 +118,28 @@ const Home = () => {
     loadByType();
     
   };
+
+  const loadByWeather = async () => {
+    try {
+      const data = await fetchWeatherRecommend();
+      const sample = [...data.restaurants].sort(() => 0.5 - Math.random()).slice(0, 4);
+      setWeatherMemo(data.memo);  // ✅ 메모
+      setWeatherCondition(data.condition);  // ✅ 컨디션
+      setWeatherMenu(data.recommend);  // ✅ 추천 메뉴 리스트
+      setByWeather(sample);
+    } catch {
+      setError("날씨 기반 추천을 불러오는 중 오류가 발생했습니다.");
+  } 
+  };
+
+  useEffect(() => {
+    loadByWeather();
+  }, []);
+
+  const refreshByWeather = () => {
+    loadByWeather();
+  };
+
 
   return (
     <div className="container py-4">
@@ -197,6 +224,60 @@ const Home = () => {
       </h2>
       <div className="row gx-3 gy-4 justify-content-center mb-5">
         {byScore.map((r, i) => (
+          <div className="col-6 col-md-3" key={i}>
+            <Link
+              to={`/restaurant/${encodeURIComponent(r.upso_nm)}`}
+              target="_blank"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <div className="card shadow-sm rounded-4 h-100">
+                <img
+                  src={r.img_url || "/img/no_img.png"}
+                  alt={r.upso_nm}
+                  className="card-img-top rounded-top-4"
+                  style={{ height: "180px", objectFit: "cover" }}
+                />
+                <div className="card-body text-center p-2">
+                  <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
+                  <div><small className="text-muted">{r.addr}</small></div>
+                  <small className="text-muted">{r.MAIN_EDF}</small>
+                  <div><small className="text-muted">⭐ {r.score}</small></div>
+                </div>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "4px",               // 카드 내부 상단에서 8px
+                    right: "4px",             // 카드 내부 우측에서 8px
+                    zIndex: 10
+                  }}
+                >
+                  <FavoriteButton upso_nm={r.upso_nm} />
+                </div>                
+              </div>
+            </Link>
+          </div>
+        ))}
+      </div>
+
+      {/* 날씨씨 기반 */}
+      <h2 className="text-center mb-3 d-flex justify-content-center gap-2">
+        날씨 기반 추천 🌟
+        <button
+          className="btn btn-sm btn-outline-secondary"
+          onClick={refreshByWeather}
+          title="다시 받기"
+        >
+          🔄
+        </button>
+      </h2>
+      <p className="text-center text-muted mb-3">
+     지금 날씨는 {weatherCondition} !
+      </p>      
+      <p className="text-center text-muted mb-3">
+  💡  {weatherMemo}(메뉴 : {weatherMenu.join(", ")})
+      </p>
+      <div className="row gx-3 gy-4 justify-content-center mb-5">
+        {byWeather.map((r, i) => (
           <div className="col-6 col-md-3" key={i}>
             <Link
               to={`/restaurant/${encodeURIComponent(r.upso_nm)}`}
