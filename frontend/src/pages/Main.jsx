@@ -5,6 +5,9 @@ import ModelRestaurantCard from "../components/Model_restaurant_card";
 import InfiniteScrollTrigger from "../components/InfiniteScrollTrigger"; // ✅ 추가
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../App.css';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
+
 
 function Main() {
   const [user, setUser] = useState('');
@@ -17,6 +20,8 @@ function Main() {
   const [searchTerm, setSearchTerm] = useState(searchParams.get("name") || "");
   const [filterOpen, setFilterOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(10);
+  const [appliedYearStart, setAppliedYearStart] = useState(1987);
+  const [appliedYearEnd, setAppliedYearEnd] = useState(2025);
   const filterRef = useRef(null);
 
   // ✅ 현재 표시될 아이템 슬라이싱
@@ -31,20 +36,22 @@ function Main() {
   }, [hasMore]);
 
   // URL 업데이트
-  const updateURLParams = (gu, uptae, name) => {
+  const updateURLParams = (gu, uptae, name, yearStart, yearEnd) => {
     const newParams = {};
     if (gu) newParams.gu = gu;
     if (uptae) newParams.uptae = uptae;
     if (name) newParams.name = name;
+    if (yearStart) newParams.year_start = yearStart;
+    if (yearEnd) newParams.year_end = yearEnd;
     setSearchParams(newParams);
   };
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      updateURLParams(selectedGu, selectedUptae, searchTerm);
+      updateURLParams(selectedGu, selectedUptae, searchTerm, appliedYearStart, appliedYearEnd);
     }, 300);
     return () => clearTimeout(debounceTimer);
-  }, [selectedGu, selectedUptae, searchTerm]);
+  }, [selectedGu, selectedUptae, searchTerm, appliedYearStart, appliedYearEnd]);
 
   useEffect(() => {
     const loadOptions = async () => {
@@ -59,36 +66,23 @@ function Main() {
     const gu = searchParams.get("gu") || "";
     const uptae = searchParams.get("uptae") || "";
     const name = searchParams.get("name") || "";
+    const year_start = parseInt(searchParams.get("year_start")) || 1987;
+    const year_end = parseInt(searchParams.get("year_end")) || 2025;
 
     setSelectedGu(gu);
     setSelectedUptae(uptae);
     setSearchTerm(name);
+    setAppliedYearStart(year_start);
+    setAppliedYearEnd(year_end);
 
     const loadData = async () => {
-      const result = await fetchRestaurants(gu, uptae, name);
+      const result = await fetchRestaurants(gu, uptae, name,year_end,year_start);
       setRestaurants(result);
       setVisibleCount(10); // 초기 10개만
     };
     loadData();
   }, [searchParams]);
 
-  useEffect(() => {
-    if (filterOpen) {
-      document.body.classList.add('body-no-scroll');
-    } else {
-      document.body.classList.remove('body-no-scroll');
-    }
-  }, [filterOpen]);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (filterRef.current && !filterRef.current.contains(event.target)) {
-        setFilterOpen(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside, true);
-    return () => document.removeEventListener("click", handleClickOutside, true);
-  }, []);
 
   return (
     <div className="container py-4">
@@ -150,6 +144,26 @@ function Main() {
                   onClick={() => setSelectedUptae(uptae)}
                 >{uptae}</button>
               ))}
+            </div>
+          </div>
+          <div className="filter-section mb-3">
+            <label className="fw-bold mb-2">📅 연도 범위</label>
+            <div className="px-2">
+              <Slider
+                range
+                min={1987}
+                max={2025}
+                allowCross={false}
+                value={[appliedYearStart, appliedYearEnd]}
+                onChange={([start, end]) => {
+                  setAppliedYearStart(start);
+                  setAppliedYearEnd(end);
+                }}
+              />
+              <div className="d-flex justify-content-between mt-2">
+                <small>{appliedYearStart}년</small>
+                <small>{appliedYearEnd}년</small>
+              </div>
             </div>
           </div>
         </div>
