@@ -6,7 +6,7 @@ import MainMapPage from "./pages/MainMap";
 import StopRestaurant from "./pages/StopRestaurant";
 import Join from "./pages/Join";
 import Login from "./pages/Login";
-import { Test,AnalysisViolTTationPage } from "./pages/Analysis";
+import AnalysisViolationPage from "./pages/Analysis";
 import { useState } from "react";
 import HygieneDetailPage from "./pages/HygieneDetailPage";
 import Home from "./pages/Home";
@@ -37,8 +37,7 @@ function App() {
           <Route path="/join" element={<Join />} />
           <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
           <Route path="/favorite" element={<Favorite />} />
-          <Route path="/test" element={<Test />} />
-          <Route path="/analysis" element={<AnalysisViolTTationPage />} />
+          <Route path="/analysis" element={<AnalysisViolationPage />} />
         </Routes>
       </div>
     </Router>
