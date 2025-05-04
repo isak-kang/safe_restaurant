@@ -2,6 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useSearchParams }  from "react-router-dom";
 import InfiniteScrollTrigger      from "../components/InfiniteScrollTrigger";
 import { fetchStopRestaurant }    from "../api/api";
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 
 export default function StopRestaurant() {
   const [restaurants, setRestaurants]   = useState([]);
@@ -11,6 +13,8 @@ export default function StopRestaurant() {
   const [searchTerm, setSearchTerm]     = useState(searchParams.get("name") || "");
   const [selectedGu, setSelectedGu]     = useState(searchParams.get("gu")   || "");
   const [filterOpen, setFilterOpen]     = useState(false);
+  const [appliedYearStart, setAppliedYearStart] = useState(2015);
+  const [appliedYearEnd, setAppliedYearEnd] = useState(2025);
   const filterRef                       = useRef(null);
 
   const guOptions = [
@@ -20,7 +24,6 @@ export default function StopRestaurant() {
     "양천구","영등포구","용산구","은평구","종로구","중구","중랑구"
   ];
 
-  // 1) 데이터 로드
   useEffect(() => {
     fetchStopRestaurant()
       .then(data => setRestaurants(data))
@@ -28,24 +31,22 @@ export default function StopRestaurant() {
       .finally(() => setLoading(false));
   }, []);
 
-  // 2) 필터링
   const filteredRestaurants = restaurants.filter(r => {
     const matchName = r.upso_nm?.includes(searchTerm);
     const matchGu   = !selectedGu || r.SITE_ADDR?.includes(selectedGu) || r.SITE_ADDR_RD?.includes(selectedGu);
-    return matchName && matchGu;
+    const dispoYear = r.ADM_DISPO_YMD?.slice(0, 4);
+    const matchYear = dispoYear >= appliedYearStart && dispoYear <= appliedYearEnd;
+    return matchName && matchGu && matchYear;
   });
 
-  // 3) derive currentItems + hasMore
   const currentItems = filteredRestaurants.slice(0, visibleCount);
   const hasMore      = visibleCount < filteredRestaurants.length;
 
-  // 4) infinite‐scroll callback
   const handleLoadMore = useCallback(() => {
     if (!hasMore) return;
     setVisibleCount(v => v + 5);
   }, [hasMore]);
 
-  // 5) URL sync for name/gu
   useEffect(() => {
     const debounce = setTimeout(() => {
       const p = {};
@@ -56,7 +57,6 @@ export default function StopRestaurant() {
     return () => clearTimeout(debounce);
   }, [searchTerm, selectedGu, setSearchParams]);
 
-  // 6) close filter on outside click
   useEffect(() => {
     const onClick = e => {
       if (filterRef.current && !filterRef.current.contains(e.target)) {
@@ -72,7 +72,6 @@ export default function StopRestaurant() {
 
   return (
     <div className="container mt-4">
-      {/* 검색창 */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
         <input
           className="form-control"
@@ -83,8 +82,6 @@ export default function StopRestaurant() {
         />
       </div>
 
-
-      {/* 헤더 + 필터 토글 */}
       <h2 className="mb-4 d-flex justify-content-between align-items-center">
         <span className="mx-auto">📋 📛 영업정지 업소 리스트</span>
         <button
@@ -99,7 +96,6 @@ export default function StopRestaurant() {
         </button>
       </h2>
 
-      {/* 필터 패널 */}
       <div className={`filter-panel ${filterOpen ? "open" : ""}`} ref={filterRef}>
         <div className="filter-header position-relative mb-3">
           <button className="close-btn" onClick={() => setFilterOpen(false)}>
@@ -112,51 +108,48 @@ export default function StopRestaurant() {
             <label className="fw-bold mb-2">구 선택</label>
             <div className="btn-group flex-wrap">
               <button
-                className={`btn btn-outline-primary m-1 ${
-                  !selectedGu ? "active" : ""
-                }`}
+                className={`btn btn-outline-primary m-1 ${!selectedGu ? "active" : ""}`}
                 onClick={() => setSelectedGu("")}
-              >
-                전체
-              </button>
+              >전체</button>
               {guOptions.map(gu => (
                 <button
                   key={gu}
-                  className={`btn btn-outline-primary m-1 ${
-                    selectedGu === gu ? "active" : ""
-                  }`}
+                  className={`btn btn-outline-primary m-1 ${selectedGu === gu ? "active" : ""}`}
                   onClick={() => setSelectedGu(gu)}
-                >
-                  {gu}
-                </button>
+                >{gu}</button>
               ))}
+            </div>
+          </div>
+
+          <div className="filter-section mb-3">
+            <label className="fw-bold mb-2">📅 처분 연도</label>
+            <div className="px-2">
+              <Slider
+                range
+                min={2015}
+                max={2025}
+                allowCross={false}
+                value={[appliedYearStart, appliedYearEnd]}
+                onChange={([start, end]) => {
+                  setAppliedYearStart(start);
+                  setAppliedYearEnd(end);
+                }}
+              />
+              <div className="d-flex justify-content-between mt-2">
+                <small>{appliedYearStart}년</small>
+                <small>{appliedYearEnd}년</small>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 카드 리스트 + infinite scroll */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "1rem",
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
         {currentItems.map((row, idx) => (
           <div
             key={idx}
             className="card mb-3 card-hover"
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              width: "100%",
-              maxWidth: "800px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              borderRadius: "10px",
-              overflow: "hidden",
-            }}
+            style={{ display: "flex", flexDirection: "row", width: "100%", maxWidth: "800px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", borderRadius: "10px", overflow: "hidden" }}
           >
             <Link
               to={`/stoprestaurant/${encodeURIComponent(row.upso_nm)}`}
@@ -168,20 +161,15 @@ export default function StopRestaurant() {
                 <p>📍 {row.SITE_ADDR_RD || row.SITE_ADDR}</p>
                 <p>업종: {row.SNT_UPTAE_NM}</p>
                 <p>위반일자: {row.VIOR_YMD || "미제공"}</p>
+                <p>처분일자: {row.ADM_DISPO_YMD || "미제공"}</p>
                 <p>조치: {row.DISPO_CTN || "없음"}</p>
-                <small className="text-muted">
-                  행정처분일: {row.ADM_DISPO_YMD || "미제공"}
-                </small>
               </div>
             </Link>
           </div>
         ))}
 
         {hasMore && (
-          <InfiniteScrollTrigger
-            onIntersect={handleLoadMore}
-            hasMore={hasMore}
-          />
+          <InfiniteScrollTrigger onIntersect={handleLoadMore} hasMore={hasMore} />
         )}
 
         {!hasMore && (
