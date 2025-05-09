@@ -12,8 +12,14 @@ import numpy as np
 import jwt
 from datetime import datetime, timedelta
 
+from dotenv import load_dotenv
+import os
 
-app = FastAPI()
+load_dotenv()
+
+ROOT_PATH = os.environ.get("ROOT_PATH")
+
+app = FastAPI(root_path=ROOT_PATH)
 
 # CORS 설정 
 app.add_middleware(
