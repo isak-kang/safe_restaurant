@@ -7,6 +7,7 @@ import pandas as pd
 from utils.user import hash_password, verify_password,check_duplicate_id,create_access_token,verify_token
 from utils.weather import recommend_food_by_weather,weather_data
 from utils.similar_restaurant import rank_upso
+import numpy as np
 
 import jwt
 from datetime import datetime, timedelta
@@ -243,11 +244,13 @@ async def main_map(gu: str = "", uptae: str = "", name: str = "", year_start: st
     # 필터 적용
     if gu:
         df = df[df["addr_gu"] == gu]
+        print(gu)
+        print(df)
     if uptae:
         df = df[df["SNT_UPTAE_NM"] == uptae]
     if name:
         df = df[df["upso_nm"].str.contains(name, case=False, na=False)]
-
+        
     # ✨ 추가: 연도 필터링
     if year_start and year_end:
         df = df[
@@ -255,6 +258,15 @@ async def main_map(gu: str = "", uptae: str = "", name: str = "", year_start: st
             (df["ASGN_YY"].astype(str) <= str(year_end))
         ]
 
+    for col in df.columns:
+        if df[col].dtype in [np.float64, np.float32]:
+            if df[col].isin([np.inf, -np.inf]).any():
+                print(f"⚠️ {col}에 무한대 값 존재")
+            if df[col].isna().any():
+                print(f"⚠️ {col}에 NaN 값 존재")
+
+    df.replace([np.inf, -np.inf], np.nan, inplace=True)
+    df = df.where(pd.notnull(df), None)  # NaN → None
     return JSONResponse(content=df.to_dict(orient="records"))
 
 
@@ -647,11 +659,11 @@ async def weather_food_recommed():
 
     
     df = df[df["score"].notna()]
-
+    # print(keywords)
     return {
         "condition": food_info["condition"],
         "memo": food_info["memo"],
-        "recommend": keywords,
+        # "recommend": keywords,
         "restaurants": df.to_dict(orient="records")
     }
 

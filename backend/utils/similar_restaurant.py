@@ -19,4 +19,4 @@ def rank_upso(row, base_main_edf, base_admdng, base_snt_uptae, base_cgg_code):
         else:
             return 6
 
-    return 99
+    return 7

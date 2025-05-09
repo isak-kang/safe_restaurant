@@ -162,7 +162,7 @@ export default function StopRestaurant() {
                 <p>업종: {row.SNT_UPTAE_NM}</p>
                 <p>위반일자: {row.VIOR_YMD || "미제공"}</p>
                 <p>처분일자: {row.ADM_DISPO_YMD || "미제공"}</p>
-                <p>조치: {row.DISPO_CTN || "없음"}</p>
+                <p>처분내용: {row.VIOL_CN || "없음"}</p>
               </div>
             </Link>
           </div>
