@@ -18,7 +18,7 @@ def rank_upso(row):
         elif  row["CGG_CODE"] == base_cgg_code:
             return 4
         else: 
-            return 6
+            return 6 
     
     else:
         return 99
