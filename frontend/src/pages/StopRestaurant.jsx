@@ -67,7 +67,7 @@ export default function StopRestaurant() {
     return () => document.removeEventListener("click", onClick, true);
   }, []);
 
-  if (loading) return <div>로딩 중…</div>;
+  if (loading) return <div>데이터가 방대해서 불러오는데 시간이 5~10초 정도 걸립니다ㅠㅠ 잠시만 기다려주세요</div>;
   if (!restaurants.length) return <div>결과가 없습니다.</div>;
 
   return (
