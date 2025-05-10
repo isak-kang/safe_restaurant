@@ -1,6 +1,9 @@
 import requests
 import json
+import smtplib
 import pandas as pd
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import csv
 import pymysql
 import os
@@ -17,7 +20,8 @@ from map_data_create import total_map_data_save
 
 from datetime import datetime
 
-
+EMAIL_ID = os.environ.get("EMAIL_ID")
+EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD")
 	
 # DB
 user = os.environ.get('MYSQL_USER')
@@ -31,35 +35,91 @@ apikey = os.environ.get('API_KEY')
 # 로깅
 logging.basicConfig(filename="coord_errors.log", level=logging.WARNING)
 
-# 전체 데이터 저장 API -> totaldata
-def today_administrative_action_data_save():
 
-    now = datetime.today().strftime("%Y%m%d")
-    print(datetime.today().strftime("%Y%m%d"))
-    url = f'http://openapi.seoul.go.kr:8088/{apikey}/json/SeoulAdminMesure/1/1000/{now}'
-    print(url)
-    response = requests.get(url)
-    contents = response.text
-    json_ob = json.loads(contents)
-    
-    if json_ob['RESULT']['MESSAGE']  == "해당하는 데이터가 없습니다.":
-        return print("없음")
 
-    body = json_ob['SeoulAdminMesure']['row']
-    dataframe = pd.DataFrame(body)
-    
+
+def send_email(to_email: str, subject: str, body: str):
+    msg = MIMEMultipart()
+    msg["From"] = EMAIL_ID
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain", _charset="utf-8"))
+
     try:
-        dataframe.to_sql(name='tb_restaurant_hygiene', con=engine, if_exists='append', index=False)
-        print(f"tb_restaurant_hygiene: 데이터 삽입 성공!")
-        
-        time.sleep(10)
-
-        print("tb_restaurant_hygiene 좌표 데이터 저장 시도")
-        query = "SELECT DISTINCT(SITE_ADDR_RD) FROM restaurant_hygiene.tb_restaurant_hygiene;"
-        total_map_data_save(query)
-
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()
+            server.login(EMAIL_ID, EMAIL_PASSWORD)
+            server.send_message(msg)
+            print(f"✅ 이메일 전송 완료 → {to_email}")
     except Exception as e:
-        print(f"tb_restaurant_hygiene: 데이터 삽입 실패 - {e}")
+        print(f"❌ 이메일 전송 실패 → {to_email} : {e}")
+
+def generate_email_body(df: pd.DataFrame) -> str:
+    lines = []
+    for _, row in df.iterrows():
+        lines.append(f"📍 업소명: {row.get('UPSO_NM', '')}")
+        lines.append(f"🏠 주소: {row.get('SITE_ADDR_RD', '')}")
+        lines.append(f"📆 처분일: {row.get('VIOL_YMD', '')}")
+        lines.append(f"📝 위반내용: {row.get('VIOL_CN', '')}")
+        lines.append("-" * 40)
+    return "\n".join(lines)
+
+def get_user_emails():
+    df = df_load("SELECT email FROM user")
+    return df["email"].dropna().unique().tolist()
+
+def save_and_notify():
+    df_new = today_administrative_action_data_save()
+
+    # 신규 데이터 없으면 종료
+    if df_new.empty:
+        print("⚠️ 오늘 새로 저장된 데이터 없음")
+        return
+
+    # 이메일 본문 및 대상 리스트 준비
+    email_body = generate_email_body(df_new)
+    email_list = get_user_emails()
+    subject = f"[위생처분 알림] {pd.Timestamp.today().strftime('%Y-%m-%d')} 신규 등록"
+
+    # 바로 발송
+    for user_email in email_list:
+        send_email(user_email, subject, email_body)
+
+
+
+
+
+
+
+
+
+
+
+
+
+def today_administrative_action_data_save():
+    now = datetime.today().strftime("%Y%m%d")
+    url = f"http://openapi.seoul.go.kr:8088/{apikey}/json/SeoulAdminMesure/1/1000/20250507"
+    # url = f"http://openapi.seoul.go.kr:8088/{apikey}/json/SeoulAdminMesure/1/1000/{now}"
+    print(f"[API 요청] {url}")
+
+    response = requests.get(url)
+    json_ob = json.loads(response.text)
+
+    # 데이터 없을 때 빈 DataFrame 반환
+    if json_ob['SeoulAdminMesure']['RESULT']['MESSAGE'] == "해당하는 데이터가 없습니다.":
+        print("⚠️ 오늘 데이터 없음")
+        return pd.DataFrame()
+
+    df = pd.DataFrame(json_ob['SeoulAdminMesure']['row'])
+
+    try:
+        df.to_sql(name='tb_restaurant_hygiene', con=engine, if_exists='append', index=False)
+        print(f"✅ 데이터 삽입 성공: {len(df)}건")
+        return df
+    except Exception as e:
+        print(f"❌ DB 저장 실패: {e}")
+        return pd.DataFrame()
         
 
 
@@ -164,8 +224,12 @@ def today_model_restaurant_data_save():
 
 
 if __name__ == "__main__":
-    today_administrative_action_data_save()
-    time.sleep(2)
-    today_model_restaurant_data_save()
+    # today_administrative_action_data_save()
+    # time.sleep(2)
+    # today_model_restaurant_data_save()
+
+
+    save_and_notify()
+
 
     pass

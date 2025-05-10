@@ -12,7 +12,7 @@ load_dotenv()
 # DB
 user = os.environ.get('MYSQL_USER')
 password = os.environ.get('MYSQL_PASSWORD')
-host = os.environ.get('MYSQL_HOST') # 탄력적ip사용해야할듯 ..
+host = os.environ.get('MYSQL_HOST') 
 db = os.environ.get('MYSQL_DB')
 engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}/{db}")
 
@@ -153,6 +153,7 @@ if __name__ == "__main__":
     # csv_2 = "C:/Users/ISAK/Desktop/python/safe_restaurant/서울시 용산구 모범음식점 지정 현황.csv"
     # insert_addr_from_csv('C:/Users/ISAK/Desktop/python/safe_restaurant/crawled_kakao_img_urls.csv')
     # csv_save(csv_2,table)
-    update_addr_from_csv("C:/Users/ISAK/Desktop/python/safe_restaurant/333.csv")
+    # update_addr_from_csv("C:/Users/ISAK/Desktop/python/safe_restaurant/333.csv")
+    print(df_load("select * from kakao"))
     pass
  

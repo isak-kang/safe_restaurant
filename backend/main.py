@@ -250,8 +250,6 @@ async def main_map(gu: str = "", uptae: str = "", name: str = "", year_start: st
     # 필터 적용
     if gu:
         df = df[df["addr_gu"] == gu]
-        print(gu)
-        print(df)
     if uptae:
         df = df[df["SNT_UPTAE_NM"] == uptae]
     if name:
@@ -264,12 +262,6 @@ async def main_map(gu: str = "", uptae: str = "", name: str = "", year_start: st
             (df["ASGN_YY"].astype(str) <= str(year_end))
         ]
 
-    for col in df.columns:
-        if df[col].dtype in [np.float64, np.float32]:
-            if df[col].isin([np.inf, -np.inf]).any():
-                print(f"⚠️ {col}에 무한대 값 존재")
-            if df[col].isna().any():
-                print(f"⚠️ {col}에 NaN 값 존재")
 
     df.replace([np.inf, -np.inf], np.nan, inplace=True)
     df = df.where(pd.notnull(df), None)  # NaN → None
