@@ -196,6 +196,7 @@ export default function MainMapPage() {
                 <div>{item.upso_nm} ({item.ASGN_YY})</div>
                 <div>주소 : {item.SITE_ADDR_RD}</div>
                 <div>주메뉴 : {item.MAIN_EDF}</div>
+                <div>
                 <Link
                   to={`/restaurant/${encodeURIComponent(item.upso_nm)}`}
                   target="_blank"
@@ -205,6 +206,19 @@ export default function MainMapPage() {
                 >
                   자세히 보기
                 </Link>
+                </div>
+                <button
+                  onClick={() => {
+                    const url = `https://map.kakao.com/link/to/${
+                      encodeURIComponent(item.upso_nm)
+                    },${item.latitude},${item.longitude}`;
+                    window.open(url, '_blank');
+                  }}
+                  style={{ display: 'inline-block', marginTop: '6px', padding: '6px 12px', backgroundColor: '#007bff', color: '#fff', fontWeight: 'bold', fontSize: '13px', borderRadius: '4px', textAlign: 'center', textDecoration: 'none', boxShadow: '0 2px 6px rgba(0,0,0,0.1)', transition: 'background-color 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#007bff'}                >
+                  길찾기
+                </button>
               </div>
             )}
           </MapMarker>
