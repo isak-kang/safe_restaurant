@@ -38,7 +38,7 @@ function Header() {
     <header style={headerStyle}>
       <div>
         <Link to="/" style={styles.link}><img src="/img/logo_img.png" alt="로고" className='filter-img' 
-        style={{width:'100px',height:'100px',objectFit:'contain'}}/></Link>
+        style={{width:'20vw',height:'20vh',objectFit:'contain'}}/></Link>
       </div>
 
       {/* 모범 식당: hover로 토글 */}
@@ -101,12 +101,12 @@ const styles = {
   },
   title: {
     position: 'relative',
-    fontSize: '20px',
+    fontSize: '90%',
     fontWeight: 'bold',
     color: '#333',
     cursor: 'pointer',
     border: '2px solid black',       
-    padding: '6px 12px',             
+    padding: '1% 1%',             
     borderRadius: '6px',             
     display: 'inline-block',         
     margin: '0 8px',                
