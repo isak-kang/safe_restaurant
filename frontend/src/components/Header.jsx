@@ -36,8 +36,9 @@ function Header() {
 
   return (
     <header style={headerStyle}>
-      <div style={styles.title}>
-        <Link to="/" style={styles.link}>안전한식당</Link>
+      <div>
+        <Link to="/" style={styles.link}><img src="/img/logo_img.png" alt="로고" className='filter-img' 
+        style={{width:'100px',height:'100px',objectFit:'contain'}}/></Link>
       </div>
 
       {/* 모범 식당: hover로 토글 */}
@@ -46,11 +47,11 @@ function Header() {
         onMouseEnter={() => setRestaurantMenuOpen(true)}
         onMouseLeave={() => setRestaurantMenuOpen(false)}
       >
-        모범 식당
+        모범 음식점
         {restaurantMenuOpen && (
           <div style={styles.dropdownMenu}>
-            <Link to="/list" style={styles.dropdownLink}>모범 식당 리스트</Link>
-            <Link to="/main_map" style={styles.dropdownLink}>모범 식당 지도</Link>
+            <Link to="/list" style={styles.dropdownLink}>모범 음식점 리스트</Link>
+            <Link to="/main_map" style={styles.dropdownLink}>모범 음식점 지도</Link>
           </div>
         )}
       </div>
@@ -61,11 +62,11 @@ function Header() {
         onMouseEnter={() => setPenaltyMenuOpen(true)}
         onMouseLeave={() => setPenaltyMenuOpen(false)}
       >
-        행정 처분
+        행정 위반 음식점
         {penaltyMenuOpen && (
           <div style={styles.dropdownMenu}>
-            <Link to="/stoprestaurant" style={styles.dropdownLink}>위반 업소 리스트</Link>
-            <Link to="/analysis" style={styles.dropdownLink}>분석</Link>
+            <Link to="/stoprestaurant" style={styles.dropdownLink}>행정 위반 음식점 리스트</Link>
+            <Link to="/analysis" style={styles.dropdownLink}>행정 위반 분석 자료</Link>
           </div>
         )}
       </div>
@@ -74,21 +75,12 @@ function Header() {
         <Link to="/favorite" style={styles.link}>즐겨찾기</Link>
       </div>
 
-
-      <div onClick={() => setFilterOpen(true)}>
-        <img src="/img/option_img.png" alt="옵션" className='filter-img' />
+      <div style={styles.title}>
+        <Link to="/login" style={styles.link}>로그인</Link>
       </div>
 
-      <SideMenu filterOpen={filterOpen} setFilterOpen={setFilterOpen}>
-        <div className="filter-header mb-3">
-          <h4 className="text-center m-0">필터</h4>
-        </div>
-        {isLoggedIn ? (
-          <div onClick={handleLogout} style={{ cursor: 'pointer' }}>로그아웃</div>
-        ) : (
-          <Link to="/login" onClick={() => setFilterOpen(false)}><div>로그인</div></Link>
-        )}
-      </SideMenu>
+
+
     </header>
   );
 }
@@ -113,6 +105,12 @@ const styles = {
     fontWeight: 'bold',
     color: '#333',
     cursor: 'pointer',
+    border: '2px solid black',       
+    padding: '6px 12px',             
+    borderRadius: '6px',             
+    display: 'inline-block',         
+    margin: '0 8px',                
+    textDecoration: 'none'           
   },
   dropdownMenu: {
     position: 'absolute',
