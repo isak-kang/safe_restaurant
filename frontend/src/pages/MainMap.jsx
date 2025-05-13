@@ -138,13 +138,13 @@ export default function MainMapPage() {
         {mapData.length > 0 && (
           <div>
             {mapData.map((item, i) => (
-            <Link
-              to={`/restaurant/${encodeURIComponent(item.upso_nm)}`}
-              target="_blank"
-              style={{ textDecoration: "none", color: "inherit" }
-            }
-            >
               <div key={i} className="card mb-2 p-2 shadow-sm" style={{ display: 'flex', gap: '1rem' }}>
+                <Link
+                  to={`/restaurant/${encodeURIComponent(item.upso_nm)}`}
+                  target="_blank"
+                  style={{ textDecoration: "none", color: "inherit" }
+                }
+                >
                 {/* 이미지 썸네일 */}
                 {item.img_url && (
                   <img
@@ -160,6 +160,8 @@ export default function MainMapPage() {
                   <div style={{ fontSize: '0.9rem' }}>{item.SITE_ADDR_RD}</div>
                   <div style={{ fontSize: '0.9rem' }}>주메뉴: {item.MAIN_EDF}</div>
                   <div style={{ fontSize: '0.9rem' }}>평점: ⭐ {item.score}</div>
+                </div>
+                </Link>
                   <button
                     className="btn btn-sm btn-outline-primary mt-1"
                     onClick={() => {
@@ -169,9 +171,7 @@ export default function MainMapPage() {
                   >
                     지도에서 보기
                   </button>
-                </div>
               </div>
-              </Link>
             ))}
           </div>
         )}
