@@ -25,7 +25,7 @@ def weather_data():
     }
 
     try:
-        response = requests.get(url, params=params)
+        response = requests.get(url, params=params, timeout=2)
         response.raise_for_status()
 
         data = response.json()
