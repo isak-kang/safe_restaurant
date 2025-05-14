@@ -115,7 +115,10 @@ export default function Home() {
             className="btn btn-sm btn-outline-secondary"
             onClick={refreshByRegion}
             title="추천 다시 받기"
-          >🔄</button>
+          >
+              <img src="/img/change_img.png" alt="필터링" className="filter-img" />
+
+          </button>
         </h2>
       ) : (
         <>
@@ -125,7 +128,10 @@ export default function Home() {
               className="btn btn-sm btn-outline-secondary ms-2"
               onClick={refreshByRegion}
               title="추천 다시 받기"
-            >🔄</button>
+            >
+              <img src="/img/change_img.png" alt="필터링" className="filter-img" />
+
+            </button>
           </h2>
           <p className="text-center">
             <Link to="/login">로그인</Link> 하시면 지역 기반 추천을 받아볼 수 있어요.
@@ -150,6 +156,7 @@ export default function Home() {
                   <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
                   <div><small className="text-muted">{r.addr}</small></div>
                   <small className="text-muted">{r.MAIN_EDF}</small>
+                  <div><small className="text-muted">{r.ASGN_YMD}</small></div>
                   <div><small className="text-muted">⭐ {r.score}</small></div>
                 </div>
               </div>
@@ -162,7 +169,10 @@ export default function Home() {
       <section className="row gx-3 gy-4 justify-content-center mb-5">
         <h2 className="text-center w-100 mb-3 d-flex justify-content-center gap-2">
           평점 4.0 이상 추천 🌟
-          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByScore}>🔄</button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByScore}>
+              <img src="/img/change_img.png" alt="필터링" className="filter-img" />
+
+          </button>
         </h2>
         {byScore.map(r => (
           <div className="col-6 col-md-3" key={r.upso_nm}>
@@ -178,6 +188,7 @@ export default function Home() {
                   <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
                   <div><small className="text-muted">{r.addr}</small></div>
                   <small className="text-muted">{r.MAIN_EDF}</small>
+                  <div><small className="text-muted">{r.ASGN_YMD}</small></div>
                   <div><small className="text-muted">⭐ {r.score}</small></div>
                 </div>
               </div>
@@ -190,7 +201,10 @@ export default function Home() {
       <section className="row gx-3 gy-4 justify-content-center mb-5">
         <h2 className="text-center w-100 mb-3 d-flex justify-content-center gap-2">
           날씨 기반 추천 🌤️
-          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByWeather}>🔄</button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByWeather}>
+              <img src="/img/change_img.png" alt="필터링" className="filter-img" />
+
+          </button>
         </h2>
         <p className="text-center text-muted w-100">지금 날씨는 <strong>{weatherCondition}</strong>!</p>
         <p className="text-center text-muted w-100">
@@ -211,6 +225,8 @@ export default function Home() {
                   <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
                   <div><small className="text-muted">{r.addr}</small></div>
                   <small className="text-muted">{r.MAIN_EDF}</small>
+                  <div><small className="text-muted">{r.ASGN_YMD}</small></div>
+
                   <div><small className="text-muted">⭐ {r.score}</small></div>
                 </div>
               </div>
@@ -223,7 +239,10 @@ export default function Home() {
       <section className="row gx-3 gy-4 justify-content-center mb-5">
         <h2 className="text-center w-100 mb-3 d-flex justify-content-center gap-2">
           {currentType || "…"} 추천 🎲
-          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByType}>🔄</button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByType}>
+              <img src="/img/change_img.png" alt="필터링" className="filter-img" />
+
+          </button>
         </h2>
         {byType.map(r => (
           <div className="col-6 col-md-3" key={r.upso_nm}>
@@ -239,6 +258,7 @@ export default function Home() {
                   <h5 className="card-title fs-6 mb-0">{r.upso_nm}</h5>
                   <div><small className="text-muted">{r.addr}</small></div>
                   <small className="text-muted">{r.MAIN_EDF}</small>
+                  <div><small className="text-muted">{r.ASGN_YMD}</small></div>
                   <div><small className="text-muted">⭐ {r.score}</small></div>
                 </div>
               </div>

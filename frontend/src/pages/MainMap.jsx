@@ -159,6 +159,7 @@ export default function MainMapPage() {
                   <strong>{item.upso_nm} ({item.ASGN_YY})</strong>
                   <div style={{ fontSize: '0.9rem' }}>{item.SITE_ADDR_RD}</div>
                   <div style={{ fontSize: '0.9rem' }}>주메뉴: {item.MAIN_EDF}</div>
+                  <div style={{ fontSize: '0.9rem' }}>지정일: {item.ASGN_YMD}</div>
                   <div style={{ fontSize: '0.9rem' }}>평점: ⭐ {item.score}</div>
                 </div>
                 </Link>
@@ -196,6 +197,8 @@ export default function MainMapPage() {
                 <div>{item.upso_nm} ({item.ASGN_YY})</div>
                 <div>주소 : {item.SITE_ADDR_RD}</div>
                 <div>주메뉴 : {item.MAIN_EDF}</div>
+                <div>지정일 : {item.ASGN_YMD}</div>
+                <div>평점 :⭐ {item.score}</div>
                 <div>
                 <Link
                   to={`/restaurant/${encodeURIComponent(item.upso_nm)}`}

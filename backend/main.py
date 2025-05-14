@@ -206,7 +206,8 @@ async def main_map(gu: str = "", uptae: str = "", name: str = "", year_start: st
       B.upso_nm,
       B.SNT_UPTAE_NM,
       B.ASGN_YY,
-      B.MAIN_EDF
+      B.MAIN_EDF,
+      B.ASGN_YMD
     FROM tb_map A 
     JOIN (
       SELECT DISTINCT 
@@ -214,7 +215,8 @@ async def main_map(gu: str = "", uptae: str = "", name: str = "", year_start: st
         upso_nm, 
         SNT_UPTAE_NM,
         ASGN_YY,
-        MAIN_EDF
+        MAIN_EDF,
+        ASGN_YMD
       FROM model_restaurant_apply
       WHERE ASGN_YMD != '' AND ASGN_CANCEL_YMD = ''
     ) B

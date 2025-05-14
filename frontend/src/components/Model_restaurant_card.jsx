@@ -66,6 +66,9 @@ function ModelRestaurantCard({ row }) {
             <strong>주메뉴:</strong> {row.MAIN_EDF}
           </p>
           <p className="mb-1" style={{ fontSize: "0.9rem" }}>
+            <strong>지정일:</strong> {row.ASGN_YMD}
+          </p>
+          <p className="mb-1" style={{ fontSize: "0.9rem" }}>
             <strong>⭐ </strong> {row.score}
           </p>
         </div>
