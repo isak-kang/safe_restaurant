@@ -128,6 +128,7 @@ export default function Home() {
               className="btn btn-sm btn-outline-secondary ms-2"
               onClick={refreshByRegion}
               title="추천 다시 받기"
+              style={{backgroundColor:'#E0F2F1'}}
             >
               <img src="/img/change_img.png" alt="필터링" className="filter-img" />
 
@@ -168,8 +169,8 @@ export default function Home() {
       {/* — 평점 기반 추천 섹션 — */}
       <section className="row gx-3 gy-4 justify-content-center mb-5">
         <h2 className="text-center w-100 mb-3 d-flex justify-content-center gap-2">
-          평점 4.0 이상 추천 🌟
-          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByScore}>
+          평점 4.0 이상 추천 
+          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByScore} style={{backgroundColor:'#E0F2F1'}}>
               <img src="/img/change_img.png" alt="필터링" className="filter-img" />
 
           </button>
@@ -200,15 +201,15 @@ export default function Home() {
       {/* — 날씨 기반 추천 섹션 — */}
       <section className="row gx-3 gy-4 justify-content-center mb-5">
         <h2 className="text-center w-100 mb-3 d-flex justify-content-center gap-2">
-          날씨 기반 추천 🌤️
-          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByWeather}>
+          날씨 기반 추천 
+          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByWeather} style={{backgroundColor:'#E0F2F1'}}>
               <img src="/img/change_img.png" alt="필터링" className="filter-img" />
 
           </button>
         </h2>
         <p className="text-center text-muted w-100">지금 날씨는 <strong>{weatherCondition}</strong>!</p>
         <p className="text-center text-muted w-100">
-  💡      {weatherMemo} 
+      {weatherMemo} 
           {/* (메뉴: {weatherMenu.join(", ")}) */}
         </p>
         {byWeather.map(r => (
@@ -238,8 +239,8 @@ export default function Home() {
       {/* — 업태 랜덤 추천 섹션 — */}
       <section className="row gx-3 gy-4 justify-content-center mb-5">
         <h2 className="text-center w-100 mb-3 d-flex justify-content-center gap-2">
-          {currentType || "…"} 추천 🎲
-          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByType}>
+          {currentType || "…"} 추천 
+          <button className="btn btn-sm btn-outline-secondary" onClick={refreshByType} style={{backgroundColor:'#E0F2F1'}}>
               <img src="/img/change_img.png" alt="필터링" className="filter-img" />
 
           </button>

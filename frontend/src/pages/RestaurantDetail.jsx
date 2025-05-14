@@ -133,7 +133,7 @@ export default function RestaurantDetail() {
           <div>            
           {similarRestaurants.length > 0 && (
   <div className="mt-5">
-    <h4 className="text-center mb-4">🔍 유사한 매장 추천</h4>
+    <h4 className="text-center mb-4">유사한 매장 추천</h4>
 
     <div className="row gx-3 gy-4 justify-content-center">
       {similarRestaurants.map((r, i) => (

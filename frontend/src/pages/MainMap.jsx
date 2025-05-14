@@ -65,7 +65,7 @@ export default function MainMapPage() {
         </button>
 
         {/* 검색 */}
-        <h5>🖊️ 업소 이름</h5>
+        <h5>업소 이름</h5>
         <input
           type="text"
           value={tempName}
@@ -97,7 +97,7 @@ export default function MainMapPage() {
         {showFilters && (
           <>
             {/* 구 선택 */}
-            <h5>📍 구 선택</h5>
+            <h5>구 선택</h5>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
               <button onClick={() => setAppliedGu('')} className={appliedGu === '' ? 'btn btn-danger' : 'btn btn-outline-danger'}>초기화</button>
               {guOptions.map(gu => (
@@ -106,7 +106,7 @@ export default function MainMapPage() {
             </div>
 
             {/* 업태 선택 */}
-            <h5>🍴 업태 선택</h5>
+            <h5>업태 선택</h5>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
               <button onClick={() => setAppliedUptae('')} className={appliedUptae === '' ? 'btn btn-danger' : 'btn btn-outline-danger'}>초기화</button>
               {uptaeOptions.map(ut => (
@@ -115,7 +115,7 @@ export default function MainMapPage() {
             </div>
 
             {/* 연도 슬라이더 */}
-            <h5>📅 연도 범위</h5>
+            <h5>연도 범위</h5>
             <Slider
               range
               min={1987}

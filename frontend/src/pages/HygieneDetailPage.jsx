@@ -57,7 +57,7 @@ function HygieneDetailPage() {
 
   return (
     <div className="container py-4">
-      <h2 className="text-center mb-4">🧼 위생 행정처분 상세 정보</h2>
+      <h2 className="text-center mb-4"> 위생 행정처분 상세 정보</h2>
       {/* <button
         className="btn btn-outline-secondary mb-3"
         onClick={() => navigate(-1)}
@@ -66,7 +66,7 @@ function HygieneDetailPage() {
       </button> */}
       {restaurants.map((restaurant, index) => (
         <div key={index} className="mb-5">
-          <h5 className="mb-3">📌 [{index + 1}] {restaurant["upso_nm"] || upso_nm}</h5>
+          <h5 className="mb-3"> [{index + 1}] {restaurant["upso_nm"] || upso_nm}</h5>
           <table className="table table-bordered">
             <tbody>
               {Object.entries(restaurant).map(([key, value]) => (

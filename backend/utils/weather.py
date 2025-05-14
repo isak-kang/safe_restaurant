@@ -49,7 +49,7 @@ def recommend_food_by_weather(weather_data):
     # 비어 있거나 실패한 경우 기본 메시지 반환
     if not weather_data:
         return {
-            "condition": "API를 가져오는데 실패했어요 ㅠㅠ 잘모르겠습니다.",
+            "condition": "잘모르겠습니다.",
             "recommend": [""],
             "memo": "날씨 API를 가져오는데 실패했습니다."
         }

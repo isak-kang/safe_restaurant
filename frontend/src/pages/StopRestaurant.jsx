@@ -83,9 +83,9 @@ export default function StopRestaurant() {
       </div>
 
       <h2 className="mb-4 d-flex justify-content-between align-items-center">
-        <span className="mx-auto">📋 📛 영업정지 업소 리스트</span>
+        <span className="mx-auto">영업정지 업소 리스트</span>
         <button
-          className="btn btn-primary btn-sm"
+          className="btn btn-primary btn-sm w-auto" style={{backgroundColor:'#E0F2F1'}}
           onClick={() => setFilterOpen(o => !o)}
         >
           <img
@@ -158,7 +158,7 @@ export default function StopRestaurant() {
             >
               <div className="card-body" style={{ padding: "1rem" }}>
                 <h5 style={{ fontWeight: 600 }}>{row.upso_nm}</h5>
-                <p>📍 {row.SITE_ADDR_RD || row.SITE_ADDR}</p>
+                <p> {row.SITE_ADDR_RD || row.SITE_ADDR}</p>
                 <p>업종: {row.SNT_UPTAE_NM}</p>
                 <p>위반일자: {row.VIOR_YMD || "미제공"}</p>
                 <p>처분일자: {row.ADM_DISPO_YMD || "미제공"}</p>

@@ -45,7 +45,7 @@ export function AnalysisViolationPage() {
       </div>
 
       <div className="mb-4 shadow p-3 rounded bg-white">
-        <h5 className="text-center mb-3">🚨 위반 항목별 비율</h5>
+        <h5 className="text-center mb-3">위반 항목별 비율</h5>
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
@@ -67,7 +67,7 @@ export function AnalysisViolationPage() {
       </div>
 
       <div className="mb-4 shadow p-3 rounded bg-white">
-        <h5 className="text-center mb-3">📊 연도별 위반 발생 수</h5>
+        <h5 className="text-center mb-3">연도별 위반 발생 수</h5>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={yearData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <XAxis dataKey="year" />
@@ -79,7 +79,7 @@ export function AnalysisViolationPage() {
       </div>
 
       <div className="card mt-4">
-        <div className="card-header fw-bold">📄 지역 상세 분석 리포트</div>
+        <div className="card-header fw-bold">지역 상세 분석 리포트</div>
         <div className="card-body">
           <AnalysisMarkdown gu={selectedGu || '서울시전체'} />
         </div>

@@ -109,8 +109,8 @@ function Main() {
       </div>
       {/* 타이틀 및 필터 버튼 */}
       <h2 className="mb-4 d-flex justify-content-between align-items-center">
-        <span className="mx-auto">📋 {selectedGu} 모범음식점</span>
-        <button onClick={() => setFilterOpen(!filterOpen)} className="btn btn-primary btn-sm w-auto">
+        <span className="mx-auto">{selectedGu} 모범음식점</span>
+        <button onClick={() => setFilterOpen(!filterOpen)} className="btn btn-primary btn-sm w-auto" style={{backgroundColor:'#E0F2F1'}}>
           <img src="/img/filtering_img.png" alt="필터링" className="filter-img" />
         </button>
       </h2>
