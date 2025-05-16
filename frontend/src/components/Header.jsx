@@ -111,7 +111,6 @@ const styles = {
     display: 'inline-block',         
     margin: '0 8px',                
     textDecoration: 'none',    
-    fontSize : '16px'       
   },
   dropdownMenu: {
     position: 'absolute',

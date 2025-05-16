@@ -99,7 +99,7 @@ def save_and_notify():
 
 def today_administrative_action_data_save():
     now = datetime.today().strftime("%Y%m%d")
-    url = f"http://openapi.seoul.go.kr:8088/{apikey}/json/SeoulAdminMesure/1/1000/20250507"
+    url = f"http://openapi.seoul.go.kr:8088/{apikey}/json/SeoulAdminMesure/1/1000/20250513"
     # url = f"http://openapi.seoul.go.kr:8088/{apikey}/json/SeoulAdminMesure/1/1000/{now}"
     print(f"[API 요청] {url}")
 
@@ -224,12 +224,12 @@ def today_model_restaurant_data_save():
 
 
 if __name__ == "__main__":
-    # today_administrative_action_data_save()
+    today_administrative_action_data_save()
     # time.sleep(2)
     # today_model_restaurant_data_save()
 
 
-    save_and_notify()
+    # save_and_notify()
 
 
     pass
